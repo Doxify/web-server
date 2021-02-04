@@ -1,7 +1,8 @@
 package server;
-import utils.Configuration;
+import utils.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class Server {
 
@@ -13,7 +14,7 @@ public class Server {
     }
 
     public void start() throws IOException {
-        //TODO: start the server Socket
+
         try {
             conf = new Configuration();
         } catch (IOException e) {
@@ -22,6 +23,7 @@ public class Server {
             System.exit(500);
         }
 
+        //TODO: start the server Socket
         int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen"));
         int DEFAULT_PORT = 8080;
         // Set default port (:8080) if http.config doesn't declare one
@@ -29,25 +31,58 @@ public class Server {
             ServerSocket socket = new ServerSocket(DEFAULT_PORT);
         }
         ServerSocket socket = new ServerSocket(CONFIG_PORT);
-
         Socket client = null;
 
         while( true ) {
-            client = socket.accept();
-            printHttpRequest(client);
-            doBasicAuth(client);
+            client = socket.accept(); // accepts connection from client
+            clientHandler(client); // client handler
+            // doBasicAuth(client);
             client.close();
-
         }
     }
 
+    protected static void clientHandler(Socket client) throws IOException {
+        System.out.println("\n\nDebug: new client " + client.toString());
+        // Reads input stream from the client's socket
+        BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        String line = null, key = null, value = null;
+        Map<String, String> httpRequestMap = new HashMap<String, String>();
+
+        // Parse Request
+        line = reader.readLine(); // First line must be parsed differently (doesn't contain a colon ":")
+        //append HTTP Method to hashmap (key = "method", value = "GET, HEAD, POST, PUT, or DELETE")
+        key = "method";
+        value = line.split(" ")[0];
+        httpRequestMap.put(key, value);
+        // append path
+        key = "path";
+        value = line.split(" ")[1];
+        httpRequestMap.put(key, value);
+        // append version
+        key = "version";
+        value = line.split(" ")[2];
+        httpRequestMap.put(key, value);
+
+        while (!(line = reader.readLine()).isBlank()) {
+            key = line.split(": ")[0];
+            value = line.split(": ")[1];
+            // Parses request into a hashmap where key = directive name, value = everything after ":"
+            httpRequestMap.put(key, value);
+        }
+
+        // Outputs all httpRequestMap keys & values
+        httpRequestMap.entrySet().forEach(entry->{
+            System.out.println("Debug: key=" + entry.getKey() + ", value=" + entry.getValue());
+        });
+    }
 
     //TODO: MimeType Config for HEADER
     public void mimeTypeConfig(String extension) throws IOException {
         //TODO: Parse mime.types file into Hashmap
-
+        // call parse if it hasnt already
         //TODO: compare extension passed with Hashmap keys
     }
+
 
     protected static void doBasicAuth(Socket client) throws IOException {
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
@@ -55,13 +90,5 @@ public class Server {
         out.print("WWW-Authenticate: Basic\r\n");
         out.print("\r\n");
         out.flush();
-    }
-
-    protected static void printHttpRequest(Socket client) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        String line = null;
-
-        while ((line = reader.readLine()) != null && line.trim().length() != 0)
-            System.out.println(line);
     }
 }
