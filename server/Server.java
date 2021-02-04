@@ -14,10 +14,22 @@ public class Server {
 
     public void start() throws IOException {
         //TODO: start the server Socket
-//        int port = Integer.parseInt(conf.getHttpd().getProperty("Listen"));
-//        System.out.println("The port:" + port);
+        try {
+            conf = new Configuration();
+        } catch (IOException e) {
+            System.out.println("Error: loading config file(s) failed.\r\n");
+            System.out.println(e.getMessage());
+            System.exit(500);
+        }
+
+        int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen"));
         int DEFAULT_PORT = 8080;
-        ServerSocket socket = new ServerSocket( DEFAULT_PORT );
+        // Set default port (:8080) if http.config doesn't declare one
+        if (CONFIG_PORT == 0) {
+            ServerSocket socket = new ServerSocket(DEFAULT_PORT);
+        }
+        ServerSocket socket = new ServerSocket(CONFIG_PORT);
+
         Socket client = null;
 
         while( true ) {
