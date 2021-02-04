@@ -7,8 +7,8 @@ import java.util.Properties;
 
 public class Configuration {
 
-    private Properties httpd;
-    private Properties mime;
+    private static Properties httpd;
+    private static Properties mime;
 
     public Configuration() throws IOException {
         httpd = loadConfiguration("./conf/httpd.conf");
