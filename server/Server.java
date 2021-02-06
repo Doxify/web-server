@@ -6,15 +6,12 @@ import java.util.*;
 
 public class Server {
 
-    private static Configuration conf;
-
+    private Configuration conf;
+    private ServerSocket socket;
+    private Socket client;
 
     public Server() {
-        //TODO: constructor should read config files
-    }
-
-    public void start() throws IOException {
-
+        // Load the configuration for the server from flatfile
         try {
             conf = new Configuration();
         } catch (IOException e) {
@@ -22,58 +19,65 @@ public class Server {
             System.out.println(e.getMessage());
             System.exit(500);
         }
+    }
 
-        //TODO: start the server Socket
-        int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen"));
-        int DEFAULT_PORT = 8080;
-        // Set default port (:8080) if http.config doesn't declare one
-        if (CONFIG_PORT == 0) {
-            ServerSocket socket = new ServerSocket(DEFAULT_PORT);
-        }
-        ServerSocket socket = new ServerSocket(CONFIG_PORT);
-        Socket client = null;
+    public void start() {
+        // get the port from the configuration file
+        int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen", "8080"));
+        
+        try {
+            // start the server socket
+            socket = new ServerSocket(CONFIG_PORT);
+            client = null;
 
-        while( true ) {
-            client = socket.accept(); // accepts connection from client
-            clientHandler(client); // client handler
-            // doBasicAuth(client);
-            client.close();
+            // wait for and process requests
+            while( true ) {
+                client = socket.accept(); // accepts connection from client
+                parseRequest(client); // client handler
+                // doBasicAuth(client);
+                client.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Error: Could not start server socket.\r\n");
+            System.out.println(e.getMessage());
+            System.exit(500);
         }
     }
 
-    protected static void clientHandler(Socket client) throws IOException {
-        System.out.println("\n\nDebug: new client " + client.toString());
-        // Reads input stream from the client's socket
+    private static void parseRequest(Socket client) throws IOException {
+        // reads input stream from the client's socket
         BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        String line = null, key = null, value = null;
-        Map<String, String> httpRequestMap = new HashMap<String, String>();
+        
+        // these variables are used to build the request object
+        String path = null;
+        String method = null;
+        String version = null;
+        HashMap<String, String> headers = new HashMap<String, String>();
 
-        // Parse Request
-        line = reader.readLine(); // First line must be parsed differently (doesn't contain a colon ":")
-        //append HTTP Method to hashmap (key = "method", value = "GET, HEAD, POST, PUT, or DELETE")
-        key = "method";
-        value = line.split(" ")[0];
-        httpRequestMap.put(key, value);
-        // append path
-        key = "path";
-        value = line.split(" ")[1];
-        httpRequestMap.put(key, value);
-        // append version
-        key = "version";
-        value = line.split(" ")[2];
-        httpRequestMap.put(key, value);
+        // Parsing the request
+        String line = null;
+        String[] lineSplit;
 
-        while (!(line = reader.readLine()).isBlank()) {
-            key = line.split(": ")[0];
-            value = line.split(": ")[1];
-            // Parses request into a hashmap where key = directive name, value = everything after ":"
-            httpRequestMap.put(key, value);
+        while (!(line = reader.readLine()).isBlank()) {            
+            // if path is null, we are on the first line and it must be parsed 
+            // differently (doesn't contain a colon ":").
+            if(path == null) {
+                lineSplit = line.split(" ");
+                path = lineSplit[0];
+                method = lineSplit[1];
+                version = lineSplit[2];
+                continue;
+            }
+
+            // Parsing the headers
+            lineSplit = line.split(": ");
+            headers.put(lineSplit[0], lineSplit[1]);
         }
 
-        // Outputs all httpRequestMap keys & values
-        httpRequestMap.entrySet().forEach(entry->{
-            System.out.println("Debug: key=" + entry.getKey() + ", value=" + entry.getValue());
-        });
+        // create the request object and print it to console for now
+        // TODO: Do something with the request object, maybe put it in a queue? idk
+        Request request = new Request(path, method, version, headers);
+        System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
     }
 
     //TODO: MimeType Config for HEADER
