@@ -1,19 +1,19 @@
 package server;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class Request {
 
-    private String path;
-    private String method; // TODO: Turn this into an enum if feeling fancy.
-    private String version;
-    private HashMap<String,String> headers;
+    private Map<String,String>  headers;
+    private String              path;
+    private String              method; // TODO: Turn this into an enum if feeling fancy.
+    private String              version;
 
-    public Request(String path, String method, String version, HashMap<String,String> headers) {
+    public Request(Map<String,String> headers, String path, String method, String version) {
+        this.headers = headers;
         this.path = path;
         this.method = method;
         this.version = version;
-        this.headers = headers;
     }
 
     public String getPath() {
@@ -24,7 +24,11 @@ public class Request {
         return this.method;
     }
 
-    public HashMap<String,String> getHeaders() {
+    public String getVersion() {
+        return this.version;
+    }
+
+    public Map<String,String> getHeaders() {
         return this.headers;
     }
 
