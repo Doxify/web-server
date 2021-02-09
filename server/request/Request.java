@@ -2,6 +2,7 @@ package server.request;
 
 import server.logs.Log;
 
+import java.io.IOException;
 import java.util.Map;
 
 import server.Response;
@@ -20,7 +21,7 @@ public abstract class Request {
         this.version = version;
     }
 
-    public abstract Response execute();
+    public abstract Response execute() throws IOException;
 
     public String getPath() {
         return this.path;

@@ -1,8 +1,6 @@
 package server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +49,7 @@ public class Handler {
         return generateRequest(headers, path, method, version);
     }
 
-    public static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
+    public static Request generateRequest(Map<String, String> headers, String path, String method, String version) throws IOException {
         switch(method) {
             case "GET":
                 return new Get(headers, path, method, version);
@@ -74,7 +72,7 @@ public class Handler {
      * @param request - the request to handle
      * @return Response object which represents the handled request.
      */
-    public static Response handleRequest(Request request) {
+    public static Response handleRequest(Request request) throws IOException {
       return request.execute();
     }
 

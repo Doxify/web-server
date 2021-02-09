@@ -1,9 +1,9 @@
 package server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,10 +14,10 @@ public class Response {
     private Map<String, String> headers;
     private Request request;
     private int status;
-    private int size;
-    private String contentType;
-    private int contentLength;
+    private long size;
     private byte[] content;
+    private String contentType;
+    private String contentPath;
     private boolean sent;
 
     public Response(Request request) {
@@ -41,9 +41,20 @@ public class Response {
         return this;
     }
 
-    public Response setContentType(String contentType) {
+    public void setContentType(String contentType) {
       this.contentType = contentType;
-      return this;
+    }
+
+    public void setSize(long size) {
+      this.size = size;
+    }
+
+    public void setContent(byte[] content) {
+      this.content = content;
+    }
+
+    public void setContentPath(String path) {
+      this.contentPath = path;
     }
 
     public Response setHeader(String header, String value) {
@@ -61,26 +72,44 @@ public class Response {
 
     // TODO: Complete this function, this is just a skeleton of what a response
     // at the moment.
-    public byte[] generateResponse() {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    public byte[] generateResponse() throws IOException {
+
+        int i;
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         DateFormat date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z"); // Mon, 27 Jul 2009 12:28:53 GMT
 
-        try {
-            stream.write((this.request.getVersion() + " " + this.status).getBytes());
-            stream.write(("Date: " + date).getBytes());
-            stream.write(("Server: Georgescu-Gonzalez-Server").getBytes());
-            stream.write(("Last-Modified: " + date).getBytes()); //TODO change "date" to "last-modified" when available
-            stream.write(("Content-Length: " + this.contentLength).getBytes());
-            stream.write(("ContentType: " + this.contentType + "\r\n").getBytes());
-            stream.write(("\r\n").getBytes());
-            stream.write(this.content);
-            stream.write(("Connection: Closed").getBytes()); //TODO change from string to connection status
-            stream.write(("\r\n\r\n").getBytes());
+        // sets content length & content from requested path
+        File file = new File(this.contentPath);
+        InputStream inStream = new DataInputStream(new FileInputStream(file));
+        this.size = (file.length());
+
+      try {
+        // Require for all server responses
+        outStream.write((this.request.getVersion() + " " + this.status  + "\r\n").getBytes());
+        outStream.write(("Date: " + date.format(new Date())  + "\r\n").getBytes());
+        outStream.write(("Server: Georgescu-Gonzalez-Server\r\n").getBytes());
+        outStream.write(("Content-Length: " + this.size  + "\r\n").getBytes());
+        outStream.write(("ContentType: " + this.contentType + "\r\n").getBytes());
+
+        // Headers
+        for (Map.Entry<String,String> entry : request.getHeaders().entrySet())
+          outStream.write((entry.getKey() + ": " + entry.getValue() + "\r\n").getBytes());
+
+        outStream.write(("\r\n").getBytes());
+
+        // Content
+        while ((i = inStream.read(this.content)) != -1)
+          outStream.write(this.content, 0, i); // writes bytes from file into output stream
+
+        outStream.write(("\r\n").getBytes());
+        outStream.flush();
+        outStream.close();
+
         } catch (IOException e) {
             // TODO Handle exception
         }
 
-        return stream.toByteArray();
+        return outStream.toByteArray();
     }
 
 }

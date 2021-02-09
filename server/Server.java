@@ -2,6 +2,9 @@ package server;
 import utils.*;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -13,6 +16,8 @@ public class Server {
     private static Configuration conf;
     private ServerSocket socket;
     private Socket client;
+
+    public Socket getClient() { return this.client; }
 
     public Server() {
         // Load the configuration for the server from flatfile
@@ -39,7 +44,7 @@ public class Server {
                 client = socket.accept(); // accepts connection from client
                 Request request = Handler.parseRequest(client);
                 Response response = Handler.handleRequest(request);
-                System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
+//                System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
                 client.close();
             }
         } catch (IOException e) {
@@ -70,10 +75,31 @@ public class Server {
       Properties props = conf.getMime();
       HashMap<String, String> mimetypes = new HashMap<>();
 
-      for(Map.Entry<Object, Object> x : props.entrySet()) {
-        for (String val: x.getValue().toString().split(" "))
-          mimetypes.put(val, x.getKey().toString());
+      for(Map.Entry<Object, Object> entry : props.entrySet()) {
+        for (String extension: entry.getValue().toString().split(" "))
+          mimetypes.put(extension, entry.getKey().toString());
       }
       return mimetypes;
+    }
+
+    public static int statusConfig(String path) {
+
+      Path filePath = pathConfig(path);
+
+      if (Files.exists(filePath))
+        return 200;
+
+      return 404;
+    }
+
+    public static Path pathConfig(String path) {
+
+      String CONFIG_ROOT = conf.getHttpd().getProperty("DocumentRoot");
+      CONFIG_ROOT = CONFIG_ROOT.replaceAll("^\"|\"$", "");
+
+      if ("/".equals(path))
+        path = "/index.html";
+
+      return Paths.get(CONFIG_ROOT, path);
     }
 }
