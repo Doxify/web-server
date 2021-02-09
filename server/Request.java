@@ -1,5 +1,7 @@
 package server;
 
+import server.logs.Log;
+
 import java.util.Map;
 
 public class Request {
@@ -32,6 +34,14 @@ public class Request {
         return this.headers;
     }
 
+    public void logThis() {
+      for (String name: headers.keySet()){
+        String key = name.toString();
+        String value = headers.get(name).toString();
+        System.out.println(key + " " + value);
+      }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -39,12 +49,12 @@ public class Request {
         sb.append("Path: " + this.path + "\n");
         sb.append("Method: " + this.method + "\n");
         sb.append("Version: " + this.version + "\n");
-        
+
         this.headers.entrySet().forEach(entry -> {
             sb.append(entry.getKey() + ": " + entry.getValue() + "\n");
         });
 
         return sb.toString();
     }
-    
+
 }

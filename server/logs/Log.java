@@ -2,6 +2,7 @@ package server.logs;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.logging.*;
 
 public class Log {
 
@@ -16,7 +17,7 @@ public class Log {
   private static final DateFormat date = new SimpleDateFormat("[dd/MMM/yyyy hh:mm:ss Z]");
 
   // Logs messages to file
-  public static void fileLog(String ip, String userId, String request, int status, int size) throws IOException {
+  public static void fileLog(String ip, String userId, String request) throws IOException {
     LogManager.getLogManager().reset(); // resets logging configuration
     LOGGER.setLevel(Level.ALL); // Set log levels
 
@@ -27,7 +28,7 @@ public class Log {
     LOGGER.addHandler(fileHandler);
 
     //test date format
-    LOGGER.log(Level.INFO, ip + " - " + userId + " " + date.format(new Date()) + " " + request + " " + status + " " + size );
+//    LOGGER.log(Level.INFO, ip + " - " + userId + " " + date.format(new Date()) + " " + request + " " + status + " " + size );
   }
 
   // Logs messages to console

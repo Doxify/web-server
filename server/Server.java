@@ -2,10 +2,13 @@ package server;
 import utils.*;
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class Server {
 
-    private Configuration conf;
+    private static Configuration conf;
     private ServerSocket socket;
     private Socket client;
 
@@ -23,7 +26,7 @@ public class Server {
     public void start() {
         // get the port from the configuration file
         int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen", "8080"));
-        
+
         try {
             // start the server socket
             socket = new ServerSocket(CONFIG_PORT);
@@ -32,12 +35,9 @@ public class Server {
             // wait for and process requests
             while( true ) {
                 client = socket.accept(); // accepts connection from client
-                
                 Request request = Handler.parseRequest(client);
+                 Response response = Handler.handleRequest(request);
                 System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
-
-                // doBasicAuth(client);
-                
                 client.close();
             }
         } catch (IOException e) {
@@ -48,12 +48,35 @@ public class Server {
     }
 
     //TODO: MimeType Config for HEADER
-    public void mimeTypeConfig(String extension) throws IOException {
-        //TODO: Parse mime.types file into Hashmap
-        // call parse if it hasnt already
-        //TODO: compare extension passed with Hashmap keys
+    public static String mimeTypeConfig(String path) throws IOException {
+      String extension;
+      Boolean validExtension;
+
+      //Parse mime.types file into Hashmap
+      HashMap<String, String> mimetypes = parseMimeType();
+
+      //compare extension passed with Hashmap keys
+      if (path.contains("."))
+        extension = path.substring(path.lastIndexOf(".") + 1);
+      else
+        extension = path.substring(path.lastIndexOf("/") + 1);
+
+      validExtension = mimetypes.containsKey(extension);
+      if (validExtension)
+        return mimetypes.get(extension);
+      return "text";
     }
 
+    private static HashMap<String, String> parseMimeType() {
+      Properties props = conf.getMime();
+      HashMap<String, String> mimetypes = new HashMap<String, String>();
+
+      for(Map.Entry<Object, Object> x : props.entrySet()) {
+        for (String val: x.getValue().toString().split(" "))
+          mimetypes.put(val, x.getKey().toString());
+      }
+      return mimetypes;
+    }
 
     protected static void doBasicAuth(Socket client) throws IOException {
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);

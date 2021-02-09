@@ -9,7 +9,7 @@ public class Response {
 
     private Map<String, String> headers;
     private Request request;
-    private int status;    
+    private int status;
     private int size;
     private String contentType;
     private byte[] content;
@@ -28,11 +28,20 @@ public class Response {
     public int getStatus() {
         return this.status;
     }
+    public String getContentType() { return this.contentType; }
 
     public Response setStatus(int status) {
         this.status = status;
         return this;
     }
+
+    public Response setContentType(String contentType) {
+      this.contentType = contentType;
+      return this;
+    }
+
+
+
 
     public Response setHeader(String header, String value) {
         this.headers.put(header, value);
