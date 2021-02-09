@@ -6,11 +6,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import server.request.*;
+import server.request.Request;
 
 public class Handler {
-
-
     /**
      * Parses Socket connection and returns an instance of the Request object
      * which represents the parsed connection/request.
@@ -49,9 +48,25 @@ public class Handler {
             headers.put(lineSplit[0], lineSplit[1]);
         }
 
-        return new Request(headers, path, method, version);
+        return generateRequest(headers, path, method, version);
     }
 
+    public static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
+        switch(method) {
+            case "GET":
+                return new Get(headers, path, method, version);
+            case "HEAD":
+                return new Head(headers, path, method, version);
+            case "POST":
+                return new Post(headers, path, method, version);
+            case "PUT":
+                return new Put(headers, path, method, version);
+            case "DELETE":
+                return new Delete(headers, path, method, version);
+            default:
+                return null;
+        }
+    }
 
     /**
      * This is a wrapper for handling GET, POST, PUT, DELETE, and HEAD requests.
@@ -59,59 +74,8 @@ public class Handler {
      * @param request - the request to handle
      * @return Response object which represents the handled request.
      */
-    public static Response handleRequest(Request request) throws IOException{
-        Response response;
-
-        switch(request.getMethod()) {
-            case "GET": {
-                response = handleGetRequest(request);
-                break;
-            }
-            // case "POST":
-            // case "PUT":
-            // case "DELETE":
-            // case "HEAD":
-            default: {
-                return null;
-            }
-        }
-
-        return response;
+    public static Response handleRequest(Request request) {
+      return request.execute();
     }
-
-
-    // TODO: Implement these...
-    public static Response handleGetRequest(Request request) throws IOException {
-      Response response = new Response(request);
-      // set Status
-      response.setContentType(Server.mimeTypeConfig(response.getRequest().getPath()));
-      return response;
-    }
-
-
-
-    // private static Response handlePutRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // put request code here...
-
-    //     return response;
-    // }
-
-    // private static Response handleDeleteRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // delete request code here...
-
-    //     return response;
-    // }
-
-    // private static Response handleHeadRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // head request code here...
-
-    //     return response;
-    // }
 
 }

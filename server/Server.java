@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import server.request.Request;
+
 public class Server {
 
     private static Configuration conf;
@@ -36,7 +38,7 @@ public class Server {
             while( true ) {
                 client = socket.accept(); // accepts connection from client
                 Request request = Handler.parseRequest(client);
-                 Response response = Handler.handleRequest(request);
+                Response response = Handler.handleRequest(request);
                 System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
                 client.close();
             }
@@ -47,13 +49,10 @@ public class Server {
         }
     }
 
-    //TODO: MimeType Config for HEADER
     public static String mimeTypeConfig(String path) throws IOException {
       String extension;
-      Boolean validExtension;
-
-      //Parse mime.types file into Hashmap
-      HashMap<String, String> mimetypes = parseMimeType();
+      boolean validExtension;
+      HashMap<String, String> mimetypes = parseMimeType(); //Parse mime.types file into Hashmap
 
       //compare extension passed with Hashmap keys
       if (path.contains("."))
@@ -69,20 +68,12 @@ public class Server {
 
     private static HashMap<String, String> parseMimeType() {
       Properties props = conf.getMime();
-      HashMap<String, String> mimetypes = new HashMap<String, String>();
+      HashMap<String, String> mimetypes = new HashMap<>();
 
       for(Map.Entry<Object, Object> x : props.entrySet()) {
         for (String val: x.getValue().toString().split(" "))
           mimetypes.put(val, x.getKey().toString());
       }
       return mimetypes;
-    }
-
-    protected static void doBasicAuth(Socket client) throws IOException {
-        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        out.print("HTTP/1.1 401 Unauthorized\r\n");
-        out.print("WWW-Authenticate: Basic\r\n");
-        out.print("\r\n");
-        out.flush();
     }
 }

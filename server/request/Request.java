@@ -1,10 +1,12 @@
-package server;
+package server.request;
 
 import server.logs.Log;
 
 import java.util.Map;
 
-public class Request {
+import server.Response;
+
+public abstract class Request {
 
     private Map<String,String>  headers;
     private String              path;
@@ -17,6 +19,8 @@ public class Request {
         this.method = method;
         this.version = version;
     }
+
+    public abstract Response execute();
 
     public String getPath() {
         return this.path;
@@ -34,13 +38,13 @@ public class Request {
         return this.headers;
     }
 
-    public void logThis() {
-      for (String name: headers.keySet()){
-        String key = name.toString();
-        String value = headers.get(name).toString();
-        System.out.println(key + " " + value);
-      }
-    }
+//    public void logThis() {
+//      for (String name: headers.keySet()){
+//        String key = name.toString();
+//        String value = headers.get(name).toString();
+//        System.out.println(key + " " + value);
+//      }
+//    }
 
     @Override
     public String toString() {
