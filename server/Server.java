@@ -3,6 +3,8 @@ import utils.*;
 import java.io.*;
 import java.net.*;
 
+import server.request.Request;
+
 public class Server {
 
     private Configuration conf;

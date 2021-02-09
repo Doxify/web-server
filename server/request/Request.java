@@ -1,8 +1,10 @@
-package server;
+package server.request;
 
 import java.util.Map;
 
-public class Request {
+import server.Response;
+
+public abstract class Request {
 
     private Map<String,String>  headers;
     private String              path;
@@ -15,6 +17,8 @@ public class Request {
         this.method = method;
         this.version = version;
     }
+
+    public abstract Response execute();
 
     public String getPath() {
         return this.path;
@@ -46,5 +50,5 @@ public class Request {
 
         return sb.toString();
     }
-    
+
 }

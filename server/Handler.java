@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import server.request.Request;
+
 public class Handler {
 
     /**
@@ -47,7 +49,8 @@ public class Handler {
             headers.put(lineSplit[0], lineSplit[1]);
         }
 
-        return new Request(headers, path, method, version);
+        return null;
+        // return new Request(headers, path, method, version);
     }
 
     /**
@@ -57,57 +60,8 @@ public class Handler {
      * @return Response object which represents the handled request.
      */
     public static Response handleRequest(Request request) {
-        Response response;
-
-        switch(request.getMethod()) {
-            case "GET": {
-                response = handleGetRequest(request);
-                break;
-            }
-            // case "POST":
-            // case "PUT":
-            // case "DELETE":
-            // case "HEAD":
-            default: {
-                return null;
-            }
-        }
-        
+        Response response = request.execute();
         return response;
     }
-
-
-    // TODO: Implement these...
-    private static Response handleGetRequest(Request request) {
-        Response response = new Response(request);
-
-        // get request code here...
-
-        return response;
-    }
-
-    // private static Response handlePutRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // put request code here...
-
-    //     return response;
-    // }
-
-    // private static Response handleDeleteRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // delete request code here...
-
-    //     return response;
-    // }
-
-    // private static Response handleHeadRequest(Request request) {
-    //     Response response = new Response(request);
-
-    //     // head request code here...
-
-    //     return response;
-    // }
 
 }

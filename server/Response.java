@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import server.request.Request;
+
 public class Response {
 
     private Map<String, String> headers;
