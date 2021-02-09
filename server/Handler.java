@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import server.request.*;
 import server.request.Request;
 
 public class Handler {
@@ -49,8 +50,24 @@ public class Handler {
             headers.put(lineSplit[0], lineSplit[1]);
         }
 
-        return null;
-        // return new Request(headers, path, method, version);
+        return generateRequest(headers, path, method, version);
+    }
+
+    public static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
+        switch(method) {
+            case "GET":
+                return new Get(headers, path, method, version);
+            case "HEAD":
+                return new Head(headers, path, method, version);
+            case "POST":
+                return new Post(headers, path, method, version);
+            case "PUT":
+                return new Put(headers, path, method, version);
+            case "DELETE":
+                return new Delete(headers, path, method, version);
+            default: 
+                return null;
+        }
     }
 
     /**
