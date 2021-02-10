@@ -6,10 +6,10 @@ import server.Response;
 
 public abstract class Request {
 
-    protected Map<String,String>  headers;
-    protected String              path;
-    protected String              method; // TODO: Turn this into an enum if feeling fancy.
-    protected String              version;
+    protected Map<String,String>  headers;  // map of request headers
+    protected String              path;     // path of the requested resource
+    protected String              method;   // HTTP method
+    protected String              version;  // HTTP request version
 
     public Request(Map<String,String> headers, String path, String method, String version) {
         this.headers = headers;
@@ -17,8 +17,6 @@ public abstract class Request {
         this.method = method;
         this.version = version;
     }
-
-    public abstract Response execute();
 
     public String getPath() {
         return this.path;
@@ -37,7 +35,17 @@ public abstract class Request {
     }
 
     /**
-     * Returns whether or not the given request requires authentication or not.
+     * This method executes this request and returns a Response object that
+     * represents the outcome of this Request's execution.
+     * 
+     * @return Response object with all properties set.
+     */
+    public abstract Response execute();
+
+    /**
+     * Determines if this request requires authentication headers or not
+     * 
+     * @return true if auth is required, false if not
      */
     public boolean requiresAuth() {
         // check for htaccess in directory

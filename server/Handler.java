@@ -56,9 +56,13 @@ public class Handler {
         return generateRequest(headers, path, method, version);
     }
 
-    public static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
+
+    /**
+     * Helper function for determining which type of Request object to instantiate.
+     */
+    private static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
         switch(method) {
-            case "GET":
+            case "GET": default:
                 return new Get(headers, path, method, version);
             case "HEAD":
                 return new Head(headers, path, method, version);
@@ -68,8 +72,6 @@ public class Handler {
                 return new Put(headers, path, method, version);
             case "DELETE":
                 return new Delete(headers, path, method, version);
-            default: 
-                return null;
         }
     }
     

@@ -42,9 +42,9 @@ public class Server {
                 client.getOutputStream().write(response.generateResponse()); // send client response                
                 client.close();
                 System.out.printf("[DEBUG] Successfully handled request for %s: \n", client.toString());
-
             }
         } catch (IOException e) {
+            // TODO Need to handle errors better here.
             System.out.println("Error: Could not start server socket.\r\n");
             System.out.println(e.getMessage());
             System.exit(500);

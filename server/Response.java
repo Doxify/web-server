@@ -11,50 +11,53 @@ import utils.Configuration;
 
 public class Response {
 
-    private Map<String, String> headers;
-    private Request request;
-    private int status;    
-    private byte[] content;
-    private boolean sent;
+    private Map<String, String> headers;    // map of response headers
+    private Request             request;    // request we are responding to
+    private int                 status;     // HTTP status of this request/response
+    private byte[]              content;    // the response body
 
     public Response(Request request) {
         this.headers = new HashMap<String, String>();
         this.request = request;
-        this.sent = false;
 
-        // Set the date and server headers
+        // Set default headers
         setHeader("Date", Configuration.df.format(new Date()));
         setHeader("Server", "georgescu-jose-webserver");
     }
 
+    // Returns the request object associated with this response.
     public Request getRequest() {
         return this.request;
     }
 
+    // Returns the HTTP status code for the response
     public int getStatus() {
         return this.status;
     }
 
+    // Sets the response's HTTP status code
     public void setStatus(int status) {
         this.status = status;
     }
 
+    // Adds a new header or resets a pre-existing response header.
     public void setHeader(String header, String value) {
         this.headers.put(header, value);
     }
 
+    // Sets the content (body) of the response.
     public void setContent(byte[] content) {
         this.content = content;
     }
 
-    public void setSent(boolean sent) {
-        this.sent = sent;
-    }
-
-    public boolean isSent() {
-        return this.sent;
-    }
-
+    /**
+     * Converts this response to a array of bytes.
+     * 
+     * If an error occurs while generating the array of bytes, a generic
+     * internal-server-error response is returned.
+     * 
+     * @return - a byte[] representing this Response object.
+     */
     public byte[] generateResponse() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -76,7 +79,7 @@ public class Response {
 
             stream.close();
         } catch (IOException e) {
-            // TODO Handle exception
+            // TODO returns a generic Internal Server Error (500) response.
             e.printStackTrace();
         }
 

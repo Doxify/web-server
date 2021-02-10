@@ -21,10 +21,8 @@ public class Get extends Request {
 
         System.out.println("[DEBUG] Executing a GET request");
 
-        // if(this.requiresAuth()) {
-        //     // TODO: Handle auth checks here
-        // }
-        
+        // TODO Handle auth checks here
+
         try {
             System.out.println("[DEBUG] Getting resource for request");
             
@@ -36,8 +34,8 @@ public class Get extends Request {
             res.setStatus(200);
 
             // get the mime type then set the type and length header
-            String mimeType = getResourceExtension();
-            res.setHeader("Content-Type", Configuration.getMimeType(mimeType));
+            String ext = getResourceFileExtension();
+            res.setHeader("Content-Type", Configuration.getMimeType(ext));
             res.setHeader("Content-Length", String.valueOf(content.length));
 
         } catch (IOException | NullPointerException e) {
@@ -62,7 +60,7 @@ public class Get extends Request {
      *   It uses httpd.conf:DocumentRoot as the root directory.
      *   If the path is "/" it returns index.html from the root directory.
      * 
-     * @return
+     * @return - requested resource in the form of a byte array
      */
     private byte[] getResource() throws IOException {
         String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
@@ -70,15 +68,21 @@ public class Get extends Request {
 
         if("/".equals(this.path)) {
             // return index.html from the document root.
-            System.out.printf("[DEBUG] Looking for: %s\n", rootPath + "index.html");
+            System.out.printf("[DEBUG] Looking for %s\n", rootPath + "index.html");
             return Files.readAllBytes(Paths.get(rootPath + "index.html"));
         }
 
-        System.out.printf("[DEBUG] Looking for: %s\n", rootPath + this.path);
+        System.out.printf("[DEBUG] Looking for %s\n", rootPath + this.path);
         return Files.readAllBytes(Paths.get(rootPath + this.path));
     }
 
-    private String getResourceExtension() {
+    /**
+     * Helper function that gets the extension of the file at the Request's path
+     * If the path is "/index.html", this function returns "html".
+     * 
+     * @return - the extension of the resource associated with the Request
+     */
+    private String getResourceFileExtension() {
         if("/".equals(this.path)) {
             return "html";
         } else {
