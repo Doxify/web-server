@@ -24,7 +24,7 @@ public class Server {
 
     public void start() {
         // get the port from the configuration file
-        int CONFIG_PORT = Integer.parseInt(conf.getHttpd().getProperty("Listen", "8080"));
+        int CONFIG_PORT = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
         
         try {
             // start the server socket
@@ -34,13 +34,15 @@ public class Server {
             // wait for and process requests
             while( true ) {
                 client = socket.accept(); // accepts connection from client
-                
-                Request request = Handler.parseRequest(client);
-                System.out.printf("\n[DEBUG] New request from %s: \n%s", client.toString(), request);
+                System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
 
-                // doBasicAuth(client);
+                Request request = Handler.parseRequest(client); // parse the request                
+                Response response = request.execute(); // execute the request
                 
+                client.getOutputStream().write(response.generateResponse()); // send client response                
                 client.close();
+                System.out.printf("[DEBUG] Successfully handled request for %s: \n", client.toString());
+
             }
         } catch (IOException e) {
             System.out.println("Error: Could not start server socket.\r\n");
@@ -48,14 +50,6 @@ public class Server {
             System.exit(500);
         }
     }
-
-    //TODO: MimeType Config for HEADER
-    public void mimeTypeConfig(String extension) throws IOException {
-        //TODO: Parse mime.types file into Hashmap
-        // call parse if it hasnt already
-        //TODO: compare extension passed with Hashmap keys
-    }
-
 
     protected static void doBasicAuth(Socket client) throws IOException {
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);

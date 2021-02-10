@@ -6,10 +6,10 @@ import server.Response;
 
 public abstract class Request {
 
-    private Map<String,String>  headers;
-    private String              path;
-    private String              method; // TODO: Turn this into an enum if feeling fancy.
-    private String              version;
+    protected Map<String,String>  headers;
+    protected String              path;
+    protected String              method; // TODO: Turn this into an enum if feeling fancy.
+    protected String              version;
 
     public Request(Map<String,String> headers, String path, String method, String version) {
         this.headers = headers;
@@ -34,6 +34,15 @@ public abstract class Request {
 
     public Map<String,String> getHeaders() {
         return this.headers;
+    }
+
+    /**
+     * Returns whether or not the given request requires authentication or not.
+     */
+    public boolean requiresAuth() {
+        // check for htaccess in directory
+        // return whether or not it is present
+        return false;
     }
 
     @Override

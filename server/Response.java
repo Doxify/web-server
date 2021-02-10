@@ -2,18 +2,18 @@ package server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import server.request.Request;
+import utils.Configuration;
 
 public class Response {
 
     private Map<String, String> headers;
     private Request request;
     private int status;    
-    private int size;
-    private String contentType;
     private byte[] content;
     private boolean sent;
 
@@ -21,6 +21,10 @@ public class Response {
         this.headers = new HashMap<String, String>();
         this.request = request;
         this.sent = false;
+
+        // Set the date and server headers
+        setHeader("Date", Configuration.df.format(new Date()));
+        setHeader("Server", "georgescu-jose-webserver");
     }
 
     public Request getRequest() {
@@ -31,14 +35,16 @@ public class Response {
         return this.status;
     }
 
-    public Response setStatus(int status) {
+    public void setStatus(int status) {
         this.status = status;
-        return this;
     }
 
-    public Response setHeader(String header, String value) {
+    public void setHeader(String header, String value) {
         this.headers.put(header, value);
-        return this;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
     }
 
     public void setSent(boolean sent) {
@@ -49,19 +55,29 @@ public class Response {
         return this.sent;
     }
 
-    // TODO: Complete this function, this is just a skeleton of what a response
-    // at the moment.
     public byte[] generateResponse() {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
         try {
-            stream.write((this.request.getVersion() + " \r\n" + this.status).getBytes());
-            stream.write(("ContentType: " + this.contentType + "\r\n").getBytes());
+            // write the status line
+            stream.write((this.request.getVersion() + " " + this.status + "\r\n").getBytes());
+
+            // write the headers
+            for (Map.Entry<String,String> entry : headers.entrySet())
+                stream.write((entry.getKey() + ": " + entry.getValue() + "\r\n").getBytes());
+
+
+            // TODO: Maybe this should be decided somewhere else?
+            stream.write(("Connection: Close\r\n").getBytes());
+            
+            // write the content
             stream.write(("\r\n").getBytes());
             stream.write(this.content);
-            stream.write(("\r\n\r\n").getBytes());
+
+            stream.close();
         } catch (IOException e) {
             // TODO Handle exception
+            e.printStackTrace();
         }
 
         return stream.toByteArray();

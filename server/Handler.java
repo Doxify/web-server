@@ -40,7 +40,10 @@ public class Handler {
             if(path == null) {
                 lineSplit = line.split(" ");
                 method = lineSplit[0];
-                path = lineSplit[1];
+                // This removes the first slash from a path if the path is anything other than "/".
+                // The reason for this is because DocumentRoot in httpd.conf already includes a slash
+                // at the end of the path.
+                path = lineSplit[1].equals("/") ? "/" : lineSplit[1].substring(1);
                 version = lineSplit[2];
                 continue;
             }
@@ -69,16 +72,5 @@ public class Handler {
                 return null;
         }
     }
-
-    /**
-     * This is a wrapper for handling GET, POST, PUT, DELETE, and HEAD requests.
-     * 
-     * @param request - the request to handle
-     * @return Response object which represents the handled request.
-     */
-    public static Response handleRequest(Request request) {
-        Response response = request.execute();
-        return response;
-    }
-
+    
 }
