@@ -1,4 +1,5 @@
 package server;
+import server.logger.Log;
 import utils.*;
 import java.io.*;
 import java.net.*;
@@ -7,55 +8,62 @@ import server.request.Request;
 
 public class Server {
 
-    private Configuration conf;
-    private ServerSocket socket;
-    private Socket client;
+  private Configuration conf;
+  private ServerSocket socket;
+  private Socket client;
+  private final Log logger = new Log();
 
-    public Server() {
-        // Load the configuration for the server from flatfile
-        try {
-            conf = new Configuration();
-        } catch (IOException e) {
-            System.out.println("Error: loading config file(s) failed.\r\n");
-            System.out.println(e.getMessage());
-            System.exit(500);
-        }
+  public Server() {
+    // Load the configuration for the server from flatfile
+    try {
+      conf = new Configuration();
+    } catch (IOException e) {
+      System.out.println("Error: loading config file(s) failed.\r\n");
+      System.out.println(e.getMessage());
+      System.exit(500);
     }
+  }
 
-    public void start() {
-        // get the port from the configuration file
-        int CONFIG_PORT = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
-        
-        try {
-            // start the server socket
-            socket = new ServerSocket(CONFIG_PORT);
-            client = null;
+  public void start() {
+    // get the port from the configuration file
+    int CONFIG_PORT = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
 
-            // wait for and process requests
-            while( true ) {
-                client = socket.accept(); // accepts connection from client
-                System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
+    try {
+      // start the server socket
+      socket = new ServerSocket(CONFIG_PORT);
+      client = null;
 
-                Request request = Handler.parseRequest(client); // parse the request                
-                Response response = request.execute(); // execute the request
-                
-                client.getOutputStream().write(response.generateResponse()); // send client response                
-                client.close();
-                System.out.printf("[DEBUG] Successfully handled request for %s: \n", client.toString());
-            }
-        } catch (IOException e) {
-            // TODO Need to handle errors better here.
-            System.out.println("Error: Could not start server socket.\r\n");
-            System.out.println(e.getMessage());
-            System.exit(500);
-        }
+      // wait for and process requests
+      while( true ) {
+
+        logger.open(); // initializes logger and handler(s)
+        client = socket.accept(); // accepts connection from client
+        System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
+
+        // Parses the request, then executes the request
+        Request request = Handler.parseRequest(client);
+        Response response = request.execute();
+
+        logger.log(response); // logs to file and outputs to console
+        client.getOutputStream().write(response.generateResponse()); // send client response
+
+        // closes handler(s) & client connection
+        logger.close();
+        client.close();
+
+      }
+    } catch (IOException e) {
+      System.out.println("Error: Could not start server socket.\r\n");
+      System.out.println(e.getMessage());
+      System.exit(500);
     }
+  }
 
-    protected static void doBasicAuth(Socket client) throws IOException {
-        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        out.print("HTTP/1.1 401 Unauthorized\r\n");
-        out.print("WWW-Authenticate: Basic\r\n");
-        out.print("\r\n");
-        out.flush();
-    }
+  protected static void doBasicAuth(Socket client) throws IOException {
+    PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+    out.print("HTTP/1.1 401 Unauthorized\r\n");
+    out.print("WWW-Authenticate: Basic\r\n");
+    out.print("\r\n");
+    out.flush();
+  }
 }

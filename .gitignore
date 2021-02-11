@@ -80,3 +80,4 @@ fabric.properties
 
 # Local History for Visual Studio Code
 .history/
+/file_system/public_html/
