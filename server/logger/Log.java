@@ -1,6 +1,5 @@
 package server.logger;
 import server.Response;
-import server.request.Request;
 import utils.Configuration;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -13,12 +12,6 @@ import java.util.logging.*;
 
 public class Log {
 
-  // TODO: We should create a custom logger that uses a custom format
-  // Something like [date time] [log type] <message>
-
-  // We can also use this class to automatically log something to our
-  // log file. Whenever we call a log method, this class could automatically
-  // log to the file!
   private Logger LOGGER = Logger.getLogger(Log.class.getName()); // Creates Logger
   private FileHandler fileHandler;
   private ConsoleHandler consoleHandler;
@@ -27,7 +20,7 @@ public class Log {
   private String identd = "-";
   private String userID = "-";
 
-  public void open() throws IOException {
+  public void open() throws IOException, SecurityException {
 
     LogManager.getLogManager().reset(); // resets logging configuration
     LOGGER.setUseParentHandlers(false);
@@ -52,19 +45,25 @@ public class Log {
     LOGGER.addHandler(fileHandler);
     LOGGER.addHandler(consoleHandler);
 
-
   }
 
-  public void close() throws IOException {
+  public void close() {
     fileHandler.close();
     consoleHandler.close();
   }
 
-  public void log(Response response) throws UnknownHostException {
+  public void log(Response response) {
+
+    String hostAddress;
+    try { 
+      hostAddress = InetAddress.getLocalHost().getHostAddress();     //TODO ? Not sure how to retrieve client IP without using "Servlet"
+    } catch(UnknownHostException e) {
+      hostAddress = "127.0.0.1";
+    }
 
     //Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
     LOGGER.log(Level.INFO,
-      InetAddress.getLocalHost().getHostAddress() + " " //TODO ? Not sure how to retrieve client IP without using "Servlet"
+        hostAddress + " "
         + this.identd + " "
         + this.userID + " "
         + date.format(new Date()) + " \""
