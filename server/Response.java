@@ -31,6 +31,10 @@ public class Response {
     return this.request;
   }
 
+  public Map<String, String> getHeaders() {
+    return this.headers;
+  }
+
   public int getStatus() {
     return this.status;
   }
@@ -66,13 +70,10 @@ public class Response {
       for (Map.Entry<String,String> entry : headers.entrySet())
         stream.write((entry.getKey() + ": " + entry.getValue() + "\r\n").getBytes());
 
-
-      // TODO: Maybe this should be decided somewhere else?
-      stream.write(("Connection: Close\r\n").getBytes());
-
       // write the content
       stream.write(("\r\n").getBytes());
       stream.write(this.content);
+      stream.write(("\r\n").getBytes());
 
       stream.close();
     } catch (IOException e) {

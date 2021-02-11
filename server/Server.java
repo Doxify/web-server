@@ -1,4 +1,5 @@
 package server;
+import server.logger.Log;
 import utils.*;
 import java.io.*;
 import java.net.*;
@@ -10,6 +11,7 @@ public class Server {
   private Configuration conf;
   private ServerSocket socket;
   private Socket client;
+  private final Log logger = new Log();
 
   public Server() {
     // Load the configuration for the server from flatfile
@@ -33,15 +35,21 @@ public class Server {
 
       // wait for and process requests
       while( true ) {
+
+        logger.open(); // initializes logger and handler(s)
         client = socket.accept(); // accepts connection from client
         System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
 
-        Request request = Handler.parseRequest(client); // parse the request
-        Response response = request.execute(); // execute the request
+        // Parses the request, then executes the request
+        Request request = Handler.parseRequest(client);
+        Response response = request.execute();
 
+        logger.log(response); // logs to file and outputs to console
         client.getOutputStream().write(response.generateResponse()); // send client response
+
+        // closes handler(s) & client connection
+        logger.close();
         client.close();
-        System.out.printf("[DEBUG] Successfully handled request for %s: \n", client.toString());
 
       }
     } catch (IOException e) {
