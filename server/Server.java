@@ -14,11 +14,24 @@ public class Server {
   private final Log logger = new Log();
 
   public Server() {
-    // Load the configuration for the server from flatfile
+    // Load the configuration
     try {
       conf = new Configuration();
     } catch (IOException e) {
       System.out.println("Error: loading config file(s) failed.\r\n");
+      System.out.println(e.getMessage());
+      System.exit(500);
+    }
+    
+    // Load the logger
+    try {
+      logger.open();
+    } catch (SecurityException e) {
+      System.out.println("Error: server does not have permission to access log file.\r\n");
+      System.out.println(e.getMessage());
+      System.exit(500);
+    } catch (IOException e) {
+      System.out.println("Error: opening the logger failed.\r\n");
       System.out.println(e.getMessage());
       System.exit(500);
     }
@@ -36,7 +49,6 @@ public class Server {
       // wait for and process requests
       while( true ) {
 
-        logger.open(); // initializes logger and handler(s)
         client = socket.accept(); // accepts connection from client
         System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
 
@@ -47,16 +59,21 @@ public class Server {
         logger.log(response); // logs to file and outputs to console
         client.getOutputStream().write(response.generateResponse()); // send client response
 
-        // closes handler(s) & client connection
-        logger.close();
+        // closes client connection
         client.close();
-
       }
     } catch (IOException e) {
       System.out.println("Error: Could not start server socket.\r\n");
       System.out.println(e.getMessage());
-      System.exit(500);
     }
+
+    // Seems dirty, we should clean this up sometime.
+    stop();
+    System.exit(500);
+  }
+
+  public void stop() {
+    logger.close();
   }
 
   protected static void doBasicAuth(Socket client) throws IOException {
