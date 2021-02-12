@@ -1,78 +1,76 @@
 package server.logger;
 import server.Response;
 import utils.Configuration;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.*;
 
 
 public class Log {
 
-  private Logger LOGGER = Logger.getLogger(Log.class.getName()); // Creates Logger
-  private FileHandler fileHandler;
-  private ConsoleHandler consoleHandler;
 
+  FileOutputStream stream;
+  OutputStreamWriter fileWrite;
   private final DateFormat date = new SimpleDateFormat("[dd/MMM/yyyy hh:mm:ss Z]");
   private String identd = "-";
   private String userID = "-";
 
   public void open() throws IOException, SecurityException {
 
-    LogManager.getLogManager().reset(); // resets logging configuration
-    LOGGER.setUseParentHandlers(false);
-    LOGGER.setLevel(Level.ALL); // Set log levels
-    System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s %5$s%6$s%n");
-
     // Obtain path
     String rootPathRaw = Configuration.getHttpd().getProperty("LogFile");
     String rootPath = rootPathRaw.replaceAll("\"", "");
 
-    // File handler config
-    fileHandler = new FileHandler(rootPath, true);
-    fileHandler.setLevel(Level.FINE);
-    fileHandler.setFormatter(new SimpleFormatter());
+    File file = new File(rootPath);
+    file.createNewFile(); // creates log.txt if it doesn't exist
 
-    // File handler config
-    consoleHandler = new ConsoleHandler();
-    consoleHandler.setLevel(Level.FINE);
-    consoleHandler.setFormatter(new SimpleFormatter());
-
-    // add handlers to LOGGER
-    LOGGER.addHandler(fileHandler);
-    LOGGER.addHandler(consoleHandler);
+    /*
+     FileOutputStream is an OutputStream for writing bytes to a file.
+     OutputStreams do not accept chars (or Strings).
+     By wrapping it in an OutputStreamWriter you now have a Writer,
+     which does accept Strings.
+     */
+    stream = new FileOutputStream(rootPath, true);
+    fileWrite = new OutputStreamWriter(stream);
 
   }
 
   public void close() {
-    fileHandler.close();
-    consoleHandler.close();
+    try {
+      stream.close();
+      fileWrite.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public void log(Response response) {
 
-    String hostAddress;
-    try { 
-      hostAddress = InetAddress.getLocalHost().getHostAddress();     //TODO ? Not sure how to retrieve client IP without using "Servlet"
-    } catch(UnknownHostException e) {
-      hostAddress = "127.0.0.1";
-    }
-
     //Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-    LOGGER.log(Level.INFO,
-        hostAddress + " "
-        + this.identd + " "
-        + this.userID + " "
-        + date.format(new Date()) + " \""
-        + response.getRequest().getMethod() + " "
-        + response.getRequest().getPath() + " "
-        + response.getRequest().getVersion() + "\" "
-        + response.getStatus() + " "
-        + response.getHeaders().get("Content-Length")+ " \r\n"
-    );
+    String log = String.format("%s %s %s %s \"%s %s\" %s %s %s\r\n\n",
+        "127.0.0.1",
+        this.identd,
+        this.userID,
+        date.format(new Date()),
+        response.getRequest().getMethod(),
+        response.getRequest().getPath(),
+        response.getRequest().getVersion(),
+        response.getStatus(),
+        response.getHeaders().get("Content-Length")
+      );
+
+    // Console Handler
+    System.out.println(log);
+
+    // File Handler
+    try {
+      fileWrite.write(log);
+      fileWrite.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
 
