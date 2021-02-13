@@ -57,7 +57,7 @@ public class Log {
         response.getRequest().getMethod(),
         response.getRequest().getPath(),
         response.getRequest().getVersion(),
-        response.getStatus(),
+        response.getStatus().code,
         response.getHeaders().get("Content-Length")
       );
 

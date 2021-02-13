@@ -40,10 +40,7 @@ public class Handler {
       if(path == null) {
         lineSplit = line.split(" ");
         method = lineSplit[0];
-        // This removes the first slash from a path if the path is anything other than "/".
-        // The reason for this is because DocumentRoot in httpd.conf already includes a slash
-        // at the end of the path.
-        path = lineSplit[1].equals("/") ? "/" : lineSplit[1].substring(1);
+        path = lineSplit[1];
         version = lineSplit[2];
         continue;
       }
