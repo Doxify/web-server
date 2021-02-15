@@ -49,18 +49,19 @@ public class Server {
             // wait for and process requests
             while( true ) {
 
-            client = socket.accept(); // accepts connection from client
-            System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
+              client = socket.accept(); // accepts connection from client
+              System.out.printf("\n[DEBUG] New request from %s: \n", client.toString());
 
-            // Parses the request, then executes the request
-            Request request = Handler.parseRequest(client);
-            Response response = request.execute();
+              // Parses the request, then executes the request
+              Request request = Handler.parseRequest(client);
 
-            logger.log(response); // logs to file and outputs to console
-            client.getOutputStream().write(response.generateResponse()); // send client response
+              Response response = request.execute();
+              logger.log(client, response); // logs to file and outputs to console
 
-            // closes client connection
-            client.close();
+              client.getOutputStream().write(response.generateResponse()); // send client response
+
+              // closes client connection
+              client.close();
             }
         } catch (IOException e) {
             System.out.println("Error: Could not start server socket.\r\n");
@@ -74,13 +75,5 @@ public class Server {
 
     public void stop() {
         logger.close();
-    }
-
-    protected static void doBasicAuth(Socket client) throws IOException {
-        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        out.print("HTTP/1.1 401 Unauthorized\r\n");
-        out.print("WWW-Authenticate: Basic\r\n");
-        out.print("\r\n");
-        out.flush();
     }
 }

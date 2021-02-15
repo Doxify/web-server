@@ -1,8 +1,11 @@
 package server.logger;
 import server.Response;
+import server.Server;
 import utils.Configuration;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,6 +16,7 @@ public class Log {
 
   FileOutputStream stream;
   OutputStreamWriter fileWrite;
+  Server server;
   private final DateFormat date = new SimpleDateFormat("[dd/MMM/yyyy hh:mm:ss Z]");
   private String identd = "-";
   private String userID = "-";
@@ -46,11 +50,11 @@ public class Log {
     }
   }
 
-  public void log(Response response) {
+  public void log(Socket client, Response response) {
 
     //Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-    String log = String.format("%s %s %s %s \"%s %s\" %s %s %s\r\n\n",
-        "127.0.0.1",
+    String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r\n\n",
+      (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/",""),
         this.identd,
         this.userID,
         date.format(new Date()),
