@@ -48,23 +48,4 @@ public class Get extends Request {
 
     }
 
-    /**
-     * Helper function that gets the extension of the file at the Request's path If
-     * the path is "/index.html", this function returns "html".
-     * 
-     * @return - the extension of the resource associated with the Request
-     */
-    protected String getResourceFileExtension() {
-        if ("/".equals(this.path)) {
-            return "html";
-        } else {
-            int i = this.path.lastIndexOf('.');
-            if (i > 0) {
-                return this.path.substring(i + 1);
-            } else {
-                return "";
-            }
-        }
-    }
-
 }

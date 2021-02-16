@@ -12,8 +12,12 @@ public class Post extends Request {
 
     @Override
     public Response execute() {
-        // TODO Auto-generated method stub
-        return null;
+        Response res = new Response(this);
+
+        
+
+
+        return res;
     }
     
 }
