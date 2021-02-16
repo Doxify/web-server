@@ -78,7 +78,7 @@ public abstract class Request {
       }
     }
 
-    //no auth required
+    //no auth required or auth cached
     return true;
   }
 
@@ -98,8 +98,10 @@ public abstract class Request {
   }
 
   /**
-   * Encrypts the cleartext password (that was decoded from the Base64 String
-   * provided by the client) using the SHA-1 encryption algorithm
+   * Compares the user inputted username:password with the AuthUserFile credentials
+   *
+   * validCredentials(): retrieves AuthUserFile username:{SHA}password
+   * encryptClearPassword(): encodes user inputted password using the SHA-1 encryption algorithm
    *
    * @return true if .htpassword username:password equals inputted username:password, false if not
    */
