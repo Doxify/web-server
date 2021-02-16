@@ -6,9 +6,8 @@ import server.Response;
 
 public class Head extends Request {
 
-    public Head(Map<String, String> headers, String path, String method, String version) {
-        super(headers, path, method, version);
-        // TODO Auto-generated constructor stub
+    public Head(Map<String, String> headers, String path, String method, String version, String body) {
+        super(headers, path, method, version, body);
     }
 
     @Override

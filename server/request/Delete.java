@@ -9,8 +9,8 @@ import utils.Status;
 
 public class Delete extends Request {
 
-    public Delete(Map<String, String> headers, String path, String method, String version) {
-        super(headers, path, method, version);
+    public Delete(Map<String, String> headers, String path, String method, String version, String body) {
+        super(headers, path, method, version, body);
     }
 
     @Override
