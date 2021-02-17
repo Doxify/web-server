@@ -44,30 +44,22 @@ public abstract class Request {
    */
   public abstract Response execute();
 
-
   /**
    * Handles Authentication
    *
-   * @return true if auth is passed, false if not
+   * @param req
+   * @return Status
    */
-  public boolean auth(Response res) {
-    if (res.getRequest().auth.requiresAuth()) {
-      // create a response object
-      if (res.getRequest().getHeaders().get("Authorization") == null) {
-        res.getHeaders().put("WWW-Authenticate", "Basic"); // requests Auth Header
-        res.setStatus(Status.UNAUTHORIZED); // set status code
-        return false;
-      }
+  Status auth() {
+    // create a response object
+    if (this.headers.get("Authorization") == null)
+      return Status.UNAUTHORIZED;
 
-      //User not allowed
-      if (!res.getRequest().auth.isAuthorized(res)) {
-        res.setStatus(Status.FORBIDDEN); // set status code
-        return false;
-      }
-    }
+    //User not allowed
+    if (!Authenticate.isAuthorized(this))
+      return Status.FORBIDDEN;
 
-    //no auth required or auth cached
-    return true;
+    return Status.OK;
   }
 
   @Override

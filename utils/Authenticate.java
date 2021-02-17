@@ -1,6 +1,6 @@
 package utils;
 
-import server.Response;
+import server.request.Request;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -14,7 +14,7 @@ public class Authenticate {
    *
    * @return true if auth is required, false if not
    */
-  public boolean requiresAuth() {
+  public static boolean requiresAuth() {
     // checks for htaccess in directory
     String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
     String rootPath = rootPathRaw.replaceAll("\"", "");
@@ -31,12 +31,12 @@ public class Authenticate {
    *
    * @return true if .htpasswd username:password equals inputted username:password, false if not
    */
-  public boolean isAuthorized(Response res) {
+  public static boolean isAuthorized(Request req) {
 
     // retrieves .htpasswd string
     String validCredentials = validCredentials();
     // obtain Base64 encoded string ONLY from Auth Header.
-    String authInfo = res.getRequest().getHeaders().get("Authorization").replace("Basic ", "");
+    String authInfo = req.getHeaders().get("Authorization").replace("Basic ", "");
 
     // decode Base64 encoded string
     String credentials = new String(
@@ -61,7 +61,7 @@ public class Authenticate {
    *
    * @return username:{SHA}password
    */
-  private String validCredentials() {
+  private static String validCredentials() {
     try {
       // checks for htaccess in directory
       String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
@@ -99,7 +99,7 @@ public class Authenticate {
    *
    * @return SHA-1 encrypted user entered password
    */
-  private String encryptClearPassword( String password ) {
+  private static String encryptClearPassword( String password ) {
     try {
       MessageDigest mDigest = MessageDigest.getInstance( "SHA-1" );
       byte[] result = mDigest.digest( password.getBytes() );

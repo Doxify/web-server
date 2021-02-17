@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import server.Response;
-import server.Server;
+import utils.Authenticate;
 import utils.Configuration;
 import utils.Status;
 
@@ -22,9 +22,20 @@ public class Get extends Request {
         System.out.println("[DEBUG] Executing a GET request");
 
         Response res = new Response(this);
-        // false if auth failed, continue to try-statement if true
-        if (!auth(res))
-          return res;
+
+        // Handles Authentication if required
+        if (Authenticate.requiresAuth()) {
+          switch (auth()) {
+            case UNAUTHORIZED:
+              res.getHeaders().put("WWW-Authenticate", "Basic"); // requests Auth Header
+              res.setStatus(Status.UNAUTHORIZED); //set status code
+              return res;
+            case FORBIDDEN:
+              res.setStatus(Status.FORBIDDEN);
+              return res;
+          }
+        }
+
 
         try {
             System.out.println("[DEBUG] Getting resource for request");
@@ -55,6 +66,8 @@ public class Get extends Request {
         return res;
 
     }
+
+
 
     /**
      * This function takes a path relative to the server and returns it in the form
