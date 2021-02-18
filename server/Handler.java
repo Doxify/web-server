@@ -28,11 +28,13 @@ public class Handler {
     String path = null;
     String method = null;
     String version = null;
+    String body = null;
     Map<String, String> headers = new HashMap<String, String>();
 
     // Parsing the request
     String line = null;
     String[] lineSplit;
+    int contentLength = 0;
 
     while (!(line = reader.readLine()).isBlank()) {
       // if path is null, we are on the first line and it must be parsed
@@ -45,30 +47,46 @@ public class Handler {
         continue;
       }
 
-      // Parsing the headers
-      lineSplit = line.split(": ");
-      headers.put(lineSplit[0], lineSplit[1]);
+      // parse headers
+      if((lineSplit = line.split(": ")).length == 2) {        
+        headers.put(lineSplit[0], lineSplit[1]);
+      }
+
+      // grab the content length from the header
+      try {
+        contentLength = Integer.parseInt(headers.get("Content-Length"));
+      } catch (NumberFormatException e) {
+        contentLength = 0;
+      }
+
     }
 
-    return generateRequest(headers, path, method, version);
+    // parse the data
+    if(contentLength > 0) {
+      char[] dataCArray = new char[contentLength];
+      reader.read(dataCArray, 0, contentLength);
+      body = new String(dataCArray);
+    }
+
+    return generateRequest(headers, path, method, version, body);
   }
 
 
   /**
    * Helper function for determining which type of Request object to instantiate.
    */
-  private static Request generateRequest(Map<String, String> headers, String path, String method, String version) {
-    switch(method) {
+  private static Request generateRequest(Map<String, String> headers, String path, String method, String version, String body) {
+        switch(method) {
       case "GET": default:
-        return new Get(headers, path, method, version);
+        return new Get(headers, path, method, version, body);
       case "HEAD":
-        return new Head(headers, path, method, version);
+        return new Head(headers, path, method, version, body);
       case "POST":
-        return new Post(headers, path, method, version);
-      case "PUT":
-        return new Put(headers, path, method, version);
+        return new Post(headers, path, method, version, body);
+      case "PUT": case "OPTIONS":
+        return new Put(headers, path, method, version, body);
       case "DELETE":
-        return new Delete(headers, path, method, version);
+        return new Delete(headers, path, method, version, body);
     }
   }
 
