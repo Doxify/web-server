@@ -1,4 +1,4 @@
-AuthUserFile "./file_system/public_html/.htpasswd"
+AuthUserFile "./file_system/public_html/protected/.htpasswd"
 AuthType Basic
 AuthName "Hello! Please login"
 Require valid-user

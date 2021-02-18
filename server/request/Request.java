@@ -4,7 +4,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import server.Response;
+import utils.Authenticate;
 import utils.Configuration;
+import utils.Status;
 
 public abstract class Request {
 
@@ -53,7 +55,6 @@ public abstract class Request {
   /**
    * Handles Authentication
    *
-   * @param req
    * @return Status
    */
   Status auth() {
@@ -71,12 +72,12 @@ public abstract class Request {
   /**
    * This function takes a path relative to the server and a Path object
    * representing the file or directory.
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * NOTE: It uses httpd.conf:DocumentRoot as the root directory. If the path is
    * "/" it returns index.html from the root directory.
-   * 
+   *
    * @return - requested resource in the form of a Path object
    */
   protected Path getResource() {
@@ -98,7 +99,7 @@ public abstract class Request {
   /**
    * Helper function that gets the extension of the file at the Request's path If
    * the path is "/index.html", this function returns "html".
-   * 
+   *
    * @return - the extension of the resource associated with the Request
    */
   protected String getResourceFileExtension() {

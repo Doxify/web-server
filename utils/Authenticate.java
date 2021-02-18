@@ -2,25 +2,39 @@ package utils;
 
 import server.request.Request;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Scanner;
 
 public class Authenticate {
+
+  private static StringBuilder authPath;
 
   /**
    * Determines if this request requires authentication headers or not
    *
    * @return true if auth is required, false if not
    */
-  public static boolean requiresAuth() {
+  public static boolean requiresAuth(String path) {
     // checks for htaccess in directory
+    String[] dir = path.split("/");
     String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
-    String rootPath = rootPathRaw.replaceAll("\"", "");
-    File htaccess = new File(rootPath + ".htaccess");
+    StringBuilder rootPath = new StringBuilder(rootPathRaw.replaceAll("\"", ""));
+    File htaccess;
 
-    return (htaccess.exists());
+    for (int i=1; i < dir.length; i++) {
+      htaccess = new File(rootPath + ".htaccess");
+      if (htaccess.exists()) {
+        authPath = rootPath;
+        return true;
+      }
+      rootPath.append(dir[i]).append("/");
+    }
+    return false;
   }
 
   /**
@@ -64,9 +78,7 @@ public class Authenticate {
   private static String validCredentials() {
     try {
       // checks for htaccess in directory
-      String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
-      String rootPath = rootPathRaw.replaceAll("\"", "");
-      File htaccess = new File(rootPath + ".htaccess");
+      File htaccess = new File(authPath + ".htaccess");
 
       // obtains password path
       Scanner accessScan = new Scanner(htaccess);

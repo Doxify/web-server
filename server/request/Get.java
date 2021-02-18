@@ -3,7 +3,6 @@ package server.request;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
-
 import server.Response;
 import utils.Authenticate;
 import utils.Configuration;
@@ -23,7 +22,7 @@ public class Get extends Request {
         Response res = new Response(this);
 
         // Handles Authentication if required
-        if (Authenticate.requiresAuth()) {
+        if (Authenticate.requiresAuth(res.getRequest().getPath())) {
           switch (auth()) {
             case UNAUTHORIZED:
               res.getHeaders().put("WWW-Authenticate", "Basic"); // requests Auth Header

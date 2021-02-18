@@ -30,9 +30,12 @@ public class Head extends Request {
 
             // get the resource
             byte[] content = Files.readAllBytes(this.getResource());
-            
+
             // set status code
             res.setStatus(Status.OK);
+
+            // set last-modified header
+            res.setHeader("Last-Modified", "today");
 
             // get the mime type then set the type and length header
             String ext = this.getResourceFileExtension();
@@ -48,5 +51,5 @@ public class Head extends Request {
         return res;
 
     }
-    
+
 }
