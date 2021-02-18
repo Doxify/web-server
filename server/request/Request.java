@@ -1,7 +1,10 @@
 package server.request;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.Map;
 import server.Response;
 import utils.Authenticate;
@@ -67,6 +70,49 @@ public abstract class Request {
       return Status.FORBIDDEN;
 
     return Status.OK;
+  }
+
+  /**
+   * Indicates whether cache is stale or if contents of the file has changed.
+   *
+   * @return boolean
+   */
+  public boolean cacheActive(byte[] content) {
+    try {
+      if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
+        String[] tokens = this.headers.get("If-None-Match").split("==");
+        boolean currentCache = Configuration.df.parse(this.headers.get("If-Modified-Since")).equals(lastModified());
+        boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
+        // true if cache isn't stale or if content length hasn't changed (retrieved from Etag), false otherwise
+        return currentCache && currentEtag;
+      }
+    } catch (Exception e) {
+      System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
+    }
+    //no current cache found
+    return false;
+  }
+
+  /**
+   * Retrieves last-modified date of the requested file
+   *
+   * @return Date
+   */
+  public Date lastModified() {
+    File file = new File(this.path);  // creates file object
+    long lastModified = file.lastModified(); // retrieves last-modified time
+
+    return new Date(lastModified);
+  }
+
+  /**
+   * updates last-modified of the file
+   *
+   */
+  public void updateLastModified() {
+    File file = new File(this.path);
+    Date today = new Date();
+    file.setLastModified(today.getTime());
   }
 
   /**
