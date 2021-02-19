@@ -38,8 +38,8 @@ public class Response {
     }
 
     // Returns the response headers
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    public String getHeader(String key) {
+        return this.headers.get(key);
     }
 
     // Sets the response's HTTP status code

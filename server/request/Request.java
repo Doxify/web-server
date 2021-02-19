@@ -1,15 +1,10 @@
 package server.request;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.Map;
 import server.Response;
-import utils.Authenticate;
 import utils.Configuration;
-import utils.Status;
 
 public abstract class Request {
 
@@ -18,6 +13,7 @@ public abstract class Request {
   protected String method; // HTTP method
   protected String version; // HTTP request version
   protected String body; // HTTP request body
+  protected Response res; // response for this request
 
   public Request(Map<String, String> headers, String path, String method, String version, String body) {
     this.headers = headers;
@@ -25,6 +21,7 @@ public abstract class Request {
     this.method = method;
     this.version = version;
     this.body = body;
+    this.res = new Response(this);
   }
 
   public Map<String, String> getHeaders() {
@@ -47,6 +44,19 @@ public abstract class Request {
     return this.body;
   }
 
+  public Response getResponse() {
+    return this.res;
+  }
+
+  /**
+   * Returns whether or not this request has the authorization header.
+   *
+   * @return true if it does, false if it does not.
+   */
+  public boolean hasAuthHeader() {
+    return this.headers.get("Authorization") != null;
+  }
+
   /**
    * This method executes this request and returns a Response object that
    * represents the outcome of this Request's execution.
@@ -56,70 +66,8 @@ public abstract class Request {
   public abstract Response execute();
 
   /**
-   * Handles Authentication
-   *
-   * @return Status
-   */
-  Status auth() {
-    // create a response object
-    if (this.headers.get("Authorization") == null)
-      return Status.UNAUTHORIZED;
-
-    //User not allowed
-    if (!Authenticate.isAuthorized(this))
-      return Status.FORBIDDEN;
-
-    return Status.OK;
-  }
-
-  /**
-   * Indicates whether cache is stale or if contents of the file has changed.
-   *
-   * @return boolean
-   */
-  public boolean cacheActive(byte[] content) {
-    try {
-      if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
-        String[] tokens = this.headers.get("If-None-Match").split("==");
-        boolean currentCache = Configuration.df.parse(this.headers.get("If-Modified-Since")).equals(lastModified());
-        boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
-        // true if cache isn't stale or if content length hasn't changed (retrieved from Etag), false otherwise
-        return currentCache && currentEtag;
-      }
-    } catch (Exception e) {
-      System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
-    }
-    //no current cache found
-    return false;
-  }
-
-  /**
-   * Retrieves last-modified date of the requested file
-   *
-   * @return Date
-   */
-  public Date lastModified() {
-    File file = new File(this.path);  // creates file object
-    long lastModified = file.lastModified(); // retrieves last-modified time
-
-    return new Date(lastModified);
-  }
-
-  /**
-   * updates last-modified of the file
-   *
-   */
-  public void updateLastModified() {
-    File file = new File(this.path);
-    Date today = new Date();
-    file.setLastModified(today.getTime());
-  }
-
-  /**
    * This function takes a path relative to the server and a Path object
    * representing the file or directory.
-   *
-   *
    *
    * NOTE: It uses httpd.conf:DocumentRoot as the root directory. If the path is
    * "/" it returns index.html from the root directory.
@@ -174,7 +122,6 @@ public abstract class Request {
     });
 
     sb.append("\nBody: \n" + this.body + "\n");
-
 
     return sb.toString();
   }

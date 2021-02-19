@@ -12,11 +12,6 @@ public class Post extends Request {
 
     @Override
     public Response execute() {
-        Response res = new Response(this);
-
-        
-
-
         return res;
     }
     

@@ -55,15 +55,15 @@ public class Log {
     //Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
     String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r\n\n",
       (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/",""),
-        this.identd,
-        this.userID,
-        date.format(new Date()),
-        response.getRequest().getMethod(),
-        response.getRequest().getPath(),
-        response.getRequest().getVersion(),
-        response.getStatus().code,
-        response.getHeaders().get("Content-Length")
-      );
+      this.identd,
+      this.userID,
+      date.format(new Date()),
+      response.getRequest().getMethod(),
+      response.getRequest().getPath(),
+      response.getRequest().getVersion(),
+      response.getStatus().code,
+      response.getHeader("Content-Length")
+    );
 
     // Console Handler
     System.out.println(log);

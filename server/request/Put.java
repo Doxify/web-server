@@ -17,12 +17,6 @@ public class Put extends Request {
 
     @Override
     public Response execute() {
-        Response res = new Response(this);
-
-        res.setStatus(Status.OK);
-
-        // TODO implement auth
-
         // no body is supplied, bad request was made.
         if(this.body.length() <= 0) {
             res.setStatus(Status.BAD_REQUEST);

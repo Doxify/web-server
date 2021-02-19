@@ -15,14 +15,7 @@ public class Delete extends Request {
 
     @Override
     public Response execute() {
-        // create a response object
-        Response res = new Response(this);
-
         System.out.println("[DEBUG] Executing a DELETE request");
-
-        // TODO Handle auth checks here
-
-        System.out.println("[DEBUG] Searching for resource to delete");
 
         String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
         String rootPath = rootPathRaw.replaceAll("\"", "");
@@ -39,7 +32,6 @@ public class Delete extends Request {
             
             return res;
         }
-
 
         if(deleteDirectory(file)) {
             // success
