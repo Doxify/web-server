@@ -24,6 +24,7 @@ public class Response {
         // Set default headers
         setHeader("Date", Configuration.df.format(new Date()));
         setHeader("Server", "georgescu-jose-webserver");
+        setHeader("Cache-Control", "max-age=86400 public"); // max-age 24hr
     }
 
     // Returns the request object associated with this response.
@@ -37,8 +38,8 @@ public class Response {
     }
 
     // Returns the response headers
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    public String getHeader(String key) {
+        return this.headers.get(key);
     }
 
     // Sets the response's HTTP status code
@@ -58,10 +59,10 @@ public class Response {
 
     /**
      * Converts this response to a array of bytes.
-     * 
+     *
      * If an error occurs while generating the array of bytes, a generic
      * internal-server-error response is returned.
-     * 
+     *
      * @return - a byte[] representing this Response object.
      */
     public byte[] generateResponse() {
@@ -92,5 +93,4 @@ public class Response {
 
         return stream.toByteArray();
     }
-
 }

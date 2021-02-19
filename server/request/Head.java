@@ -4,17 +4,21 @@ import java.util.Map;
 
 import server.Response;
 
-public class Head extends Request {
+public class Head extends Get {
 
-    public Head(Map<String, String> headers, String path, String method, String version) {
-        super(headers, path, method, version);
-        // TODO Auto-generated constructor stub
+    public Head(Map<String, String> headers, String path, String method, String version, String body) {
+        super(headers, path, method, version, body);
     }
 
     @Override
     public Response execute() {
-        // TODO Auto-generated method stub
-        return null;
+        // execute request as if it was a get request
+        super.execute();
+
+        // remove body since head requests dont have a body
+        res.setContent(null);
+
+        return res;
     }
-    
+
 }
