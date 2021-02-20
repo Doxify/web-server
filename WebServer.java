@@ -6,16 +6,12 @@ import utils.Configuration;
 
 public class WebServer {
 
-  private static final Log  logger = new Log();
-  
-  private static Server     server;
-  private static int        port;
+  private static final Log logger = new Log();
 
   static {
     // Load the configuration
     try {
       new Configuration();
-      port = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
     } catch (IOException e) {
       System.out.println("Error: loading config file(s) failed.\r\n");
       System.out.println(e.getMessage());
@@ -39,12 +35,12 @@ public class WebServer {
   public static void main(String[] args) {
     // This file will be compiled by script and must be at
     // the root of your project directory
-    port = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
-    server = new Server(port, logger);
-  
-    System.out.printf("Starting Web Server on port %d\n", port);
+    int port = Integer.parseInt(Configuration.getHttpd().getProperty("Listen", "8080"));
+    Server server = new Server(port, logger);
+
     server.start(); // this hangs until server is stopped
 
+    // this executes when the program is terminated/shutdown
     Runtime.getRuntime().addShutdownHook(new Thread() { 
       public void run() 
         { 

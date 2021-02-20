@@ -2,11 +2,8 @@ package utils;
 
 import server.request.Request;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Scanner;
 

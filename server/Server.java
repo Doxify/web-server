@@ -17,6 +17,7 @@ public class Server {
     public void start() {
         try {
             // start the server socket
+            System.out.printf("Starting Web Server on port %d\n", port);
             socket = new ServerSocket(port);
             
             // wait for and process requests
