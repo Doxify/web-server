@@ -24,7 +24,7 @@ public class Log {
   public void open() throws IOException, SecurityException {
 
     // Obtain path
-    String rootPathRaw = Configuration.getHttpd().getProperty("LogFile");
+    String rootPathRaw = Configuration.getConfigProperty("LogFile");
     String rootPath = rootPathRaw.replaceAll("\"", "");
 
     File file = new File(rootPath);

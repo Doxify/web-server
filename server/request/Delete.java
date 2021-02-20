@@ -17,7 +17,7 @@ public class Delete extends Request {
     public Response execute() {
         System.out.println("[DEBUG] Executing a DELETE request");
 
-        String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
+        String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
         String rootPath = rootPathRaw.replaceAll("\"", "");
         File file = new File(rootPath + this.path);
         

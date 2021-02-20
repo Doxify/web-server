@@ -75,7 +75,7 @@ public abstract class Request {
    * @return - requested resource in the form of a Path object
    */
   protected Path getResource() {
-    String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
+    String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
     String rootPath = rootPathRaw.replaceAll("\"", "");
     String fullPath;
 
