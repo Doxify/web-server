@@ -3,15 +3,11 @@ package utils;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Map.Entry;
 
 public class Configuration {
-
-    public static final DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
     private static Properties httpd;
     private static Properties mime;

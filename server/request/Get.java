@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Map;
 import server.Response;
 import utils.Configuration;
+import utils.Constants;
 import utils.Status;
 
 public class Get extends Request {
@@ -38,11 +39,11 @@ public class Get extends Request {
         res.setContent(content);
         
         // Headers for caching - Etag is unique and contains content length to compare file changes.
-        res.setHeader("Expire", Configuration.df.format(tomorrow));
+        res.setHeader("Expire", Constants.dateFormat.format(tomorrow));
         res.setHeader("Etag", today.getTime() + "==" + content.length);
 
         updateLastModified(); // update last modified date
-        res.setHeader("Last-Modified", Configuration.df.format(getLastModified()));
+        res.setHeader("Last-Modified", Constants.dateFormat.format(getLastModified()));
 
         res.setStatus(Status.OK); // set status code 200
       }
@@ -70,7 +71,7 @@ public class Get extends Request {
     try {
       if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
         String[] tokens = this.headers.get("If-None-Match").split("==");
-        boolean currentCache = Configuration.df.parse(this.headers.get("If-Modified-Since")).equals(getLastModified());
+        boolean currentCache = Constants.dateFormat.parse(this.headers.get("If-Modified-Since")).equals(getLastModified());
         boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
         // true if cache isn't stale or if content length hasn't changed (retrieved from Etag), false otherwise
         return currentCache && currentEtag;

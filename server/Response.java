@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import server.request.Request;
-import utils.Configuration;
+import utils.Constants;
 import utils.Status;
 
 public class Response {
@@ -22,7 +22,7 @@ public class Response {
         this.request = request;
 
         // Set default headers
-        setHeader("Date", Configuration.df.format(new Date()));
+        setHeader("Date", Constants.dateFormat.format(new Date()));
         setHeader("Server", "georgescu-jose-webserver");
         setHeader("Cache-Control", "max-age=86400 public"); // max-age 24hr
     }
