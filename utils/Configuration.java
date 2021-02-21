@@ -22,12 +22,12 @@ public final class Configuration {
     private static final Map<String, String> mimeTypes = new HashMap<String, String>();
 
     public Configuration(String httpdConfigPath, String mimeTypesConfigPath) {
-        // Load both the httpd.conf and mime.types files.
         Configuration.HTTPD_CONFIG_PATH = httpdConfigPath;
         Configuration.MIME_TYPE_CONFIG_PATH = mimeTypesConfigPath;
     }
 
     public void init() throws IOException {
+        // Load both the httpd.conf and mime.types files.
         loadConfigFile(HTTPD_CONFIG_PATH, httpd_config);
         loadConfigFile(MIME_TYPE_CONFIG_PATH, mime_types_config);
 
@@ -84,13 +84,10 @@ public final class Configuration {
     }
 
     /**
-     * Returns the path that corresponds to the given alias.
-     * 
-     * @param alias - alias path
-     * @return absolute path or null if alias doesn't exist.
+     * Returns a map of all aliases loaded by the config.
      */
-    public static final String getAliasPath(String alias) {
-        return aliases.get(alias);
+    public static final Map<String, String> getAliases() {
+        return aliases;
     }
 
     /**

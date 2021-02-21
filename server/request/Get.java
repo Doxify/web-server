@@ -19,8 +19,6 @@ public class Get extends Request {
 
   @Override
   public Response execute() {
-    System.out.println("[DEBUG] Executing a GET request");
-
     try {
       System.out.println("[DEBUG] Getting resource for request");
 
@@ -30,15 +28,20 @@ public class Get extends Request {
       Date today = new Date();
       Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
 
-      //if (true) -> leave content blank and status 304
-      //else -> set content, headers and status 200
+      // if (true) -> leave content blank and status 304
+      // else -> set content, headers and status 200
       if (isCacheActive(content)) {
         res.setStatus(Status.NOT_MODIFIED); // set status code 304
         return res;
       } else {
+        // set content and all content related headers
+        String ext = this.getResourceFileExtension();
         res.setContent(content);
-        
-        // Headers for caching - Etag is unique and contains content length to compare file changes.
+        res.setHeader("Content-Type", Configuration.getMimeType(ext));
+        res.setHeader("Content-Length", String.valueOf(content.length));
+
+        // Headers for caching - Etag is unique and contains content length to
+        // compare file changes.
         res.setHeader("Expire", Constants.dateFormat.format(tomorrow));
         res.setHeader("Etag", today.getTime() + "==" + content.length);
 
@@ -47,16 +50,10 @@ public class Get extends Request {
 
         res.setStatus(Status.OK); // set status code 200
       }
-
-      // get the mime type then set the type and length header
-      String ext = this.getResourceFileExtension();
-      res.setHeader("Content-Type", Configuration.getMimeType(ext));
-      res.setHeader("Content-Length", String.valueOf(content.length));
-
     } catch (IOException | NullPointerException e) {
-        // set status code
-        res.setStatus(Status.NOT_FOUND);
-        System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
+      // set status code
+      res.setStatus(Status.NOT_FOUND);
+      System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
     }
 
     return res;
@@ -71,15 +68,17 @@ public class Get extends Request {
     try {
       if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
         String[] tokens = this.headers.get("If-None-Match").split("==");
-        boolean currentCache = Constants.dateFormat.parse(this.headers.get("If-Modified-Since")).equals(getLastModified());
+        boolean currentCache = Constants.dateFormat.parse(this.headers.get("If-Modified-Since"))
+            .equals(getLastModified());
         boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
-        // true if cache isn't stale or if content length hasn't changed (retrieved from Etag), false otherwise
+        // true if cache isn't stale or if content length hasn't changed (retrieved from
+        // Etag), false otherwise
         return currentCache && currentEtag;
       }
     } catch (Exception e) {
       System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
     }
-    //no current cache found
+    // no current cache found
     return false;
   }
 
@@ -89,7 +88,7 @@ public class Get extends Request {
    * @return Date
    */
   private Date getLastModified() {
-    File file = new File(this.path);  // creates file object
+    File file = new File(this.path); // creates file object
     long lastModified = file.lastModified(); // retrieves last-modified time
     return new Date(lastModified);
   }

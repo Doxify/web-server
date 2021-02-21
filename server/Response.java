@@ -1,7 +1,6 @@
 package server;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +24,9 @@ public class Response {
         setHeader("Date", Constants.dateFormat.format(new Date()));
         setHeader("Server", "georgescu-jose-webserver");
         setHeader("Cache-Control", "max-age=86400 public"); // max-age 24hr
+        setHeader("Connection", "close");
+        setHeader("Content-Type", "text/html");
+        setHeader("Content-Length", "0");
     }
 
     // Returns the request object associated with this response.
@@ -73,24 +75,37 @@ public class Response {
             stream.write((this.request.getVersion() + " " + this.status.code + "\r\n").getBytes());
 
             // write the headers
-            for (Map.Entry<String, String> entry : headers.entrySet())
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
                 stream.write((entry.getKey() + ": " + entry.getValue() + "\r\n").getBytes());
-
-            // TODO: Maybe this should be decided somewhere else?
-            stream.write(("Connection: Close\r\n").getBytes());
+            }
 
             // write the content if it exists
-            if(this.content != null) {
+            if (this.content != null) {
                 stream.write(("\r\n").getBytes());
                 stream.write(this.content);
             }
 
             stream.close();
-        } catch (IOException e) {
-            // TODO returns a generic Internal Server Error (500) response.
+        } catch (Exception e) {
             e.printStackTrace();
+            return getGenericInternalServerError();
+
         }
 
         return stream.toByteArray();
+    }
+
+    private final byte[] getGenericInternalServerError() {
+        // StringBuilder response = new StringBuilder();
+        // response.append("HTTP/1.1 500\r\n");
+
+        // // write the headers
+        // for (Map.Entry<String, String> entry : this.headers.entrySet()) {
+        // response.append()
+        // stream.write((entry.getKey() + ": " + entry.getValue() + "\r\n").getBytes());
+        // }
+
+        // return response.toString().getBytes();
+        return null;
     }
 }

@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import server.Response;
-import utils.Configuration;
 
 public abstract class Request {
 
@@ -30,6 +29,10 @@ public abstract class Request {
 
   public String getPath() {
     return this.path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
   }
 
   public String getMethod() {
@@ -58,6 +61,14 @@ public abstract class Request {
   }
 
   /**
+   * Returns a Path object representing this request's resource.
+   */
+  public Path getResource() {
+    System.out.printf("[DEBUG] Looking for %s\n", this.path);
+    return Paths.get(this.path);
+  }
+
+  /**
    * This method executes this request and returns a Response object that
    * represents the outcome of this Request's execution.
    *
@@ -66,46 +77,17 @@ public abstract class Request {
   public abstract Response execute();
 
   /**
-   * This function takes a path relative to the server and a Path object
-   * representing the file or directory.
-   *
-   * NOTE: It uses httpd.conf:DocumentRoot as the root directory. If the path is
-   * "/" it returns index.html from the root directory.
-   *
-   * @return - requested resource in the form of a Path object
-   */
-  protected Path getResource() {
-    String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
-    String rootPath = rootPathRaw.replaceAll("\"", "");
-    String fullPath;
-
-    // resource defaults to index.html if "/" is the path
-    if ("/".equals(this.path)) {
-        fullPath = rootPath + "index.html";
-    } else {
-        fullPath = rootPath + this.path.substring(1);
-    }
-
-    System.out.printf("[DEBUG] Looking for %s\n", fullPath);
-    return Paths.get(fullPath);
-  }
-
-  /**
-   * Helper function that gets the extension of the file at the Request's path If
-   * the path is "/index.html", this function returns "html".
+   * Helper function that gets the extension of the file at the Request's path .
+   * If the path is "./index.html", this function returns "html".
    *
    * @return - the extension of the resource associated with the Request
    */
   protected String getResourceFileExtension() {
-    if ("/".equals(this.path)) {
-        return "html";
+    int i = this.path.lastIndexOf('.');
+    if (i > 0) {
+      return this.path.substring(i + 1);
     } else {
-        int i = this.path.lastIndexOf('.');
-        if (i > 0) {
-            return this.path.substring(i + 1);
-        } else {
-            return "";
-        }
+      return "";
     }
   }
 

@@ -1,4 +1,5 @@
 package server.logger;
+
 import server.Response;
 import server.Server;
 import utils.Configuration;
@@ -10,9 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 public class Log {
-
 
   FileOutputStream stream;
   OutputStreamWriter fileWrite;
@@ -31,10 +30,9 @@ public class Log {
     file.createNewFile(); // creates log.txt if it doesn't exist
 
     /*
-     FileOutputStream is an OutputStream for writing bytes to a file.
-     OutputStreams do not accept chars (or Strings).
-     By wrapping it in an OutputStreamWriter you now have a Writer,
-     which does accept Strings.
+     * FileOutputStream is an OutputStream for writing bytes to a file.
+     * OutputStreams do not accept chars (or Strings). By wrapping it in an
+     * OutputStreamWriter you now have a Writer, which does accept Strings.
      */
     stream = new FileOutputStream(rootPath, true);
     fileWrite = new OutputStreamWriter(stream);
@@ -52,18 +50,18 @@ public class Log {
 
   public void log(Socket client, Response response) {
 
-    //Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
-    String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r\n\n",
-      (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/",""),
-      this.identd,
-      this.userID,
-      date.format(new Date()),
-      response.getRequest().getMethod(),
-      response.getRequest().getPath(),
-      response.getRequest().getVersion(),
-      response.getStatus().code,
-      response.getHeader("Content-Length")
-    );
+    // Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET
+    // /apache_pb.gif HTTP/1.0" 200 2326
+    String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r\n",
+        (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/", ""), 
+        this.identd,
+        this.userID, 
+        date.format(new Date()), 
+        response.getRequest().getMethod(), 
+        response.getRequest().getPath(),
+        response.getRequest().getVersion(), 
+        response.getStatus().code, 
+        response.getHeader("Content-Length"));
 
     // Console Handler
     System.out.println(log);
@@ -77,4 +75,3 @@ public class Log {
     }
   }
 }
-

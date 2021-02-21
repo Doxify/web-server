@@ -9,6 +9,7 @@ public class WebServer {
   // These may be swapped out for args to make the program more dynamic.
   private static final String HTTPD_CONFIG_PATH = "./conf/httpd.conf";
   private static final String MIME_TYPE_CONFIG_PATH = "./conf/mime.types";
+
   private static final String DEFAULT_PORT = "8080";
 
   private static final Configuration config = new Configuration(HTTPD_CONFIG_PATH, MIME_TYPE_CONFIG_PATH);
@@ -48,12 +49,11 @@ public class WebServer {
     server.start(); // this hangs until server is stopped
 
     // this executes when the program is terminated/shutdown
-    Runtime.getRuntime().addShutdownHook(new Thread() { 
-      public void run() 
-        { 
-          System.out.printf("Closing Web Server on port %d\n", port);
-          logger.close();
-        } 
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        System.out.printf("Closing Web Server on port %d\n", port);
+        logger.close();
+      }
     });
   }
 
