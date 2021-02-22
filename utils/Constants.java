@@ -6,5 +6,5 @@ import java.text.SimpleDateFormat;
 public class Constants {
 
     public static final DateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-    
+
 }

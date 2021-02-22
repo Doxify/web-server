@@ -24,7 +24,7 @@ public class Response {
         // Set default headers
         setHeader("Date", Constants.dateFormat.format(new Date()));
         setHeader("Server", "georgescu-jose-webserver");
-        setHeader("Cache-Control", "max-age=86400 public"); // max-age 24hr
+        setHeader("Cache-Control", "public max-age=86400"); // max-age 24hr
         setHeader("Connection", "close");
     }
 
@@ -83,7 +83,7 @@ public class Response {
             }
 
             stream.close();
-            
+
             return stream.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();

@@ -139,7 +139,7 @@ public class Handler extends Thread {
   /**
    * Parses a Request's path so that it is relative to the server's file system.
    * Handles aliases, script aliases, and resolve path.
-   * 
+   *
    * @param path - raw HTTP request path
    */
   private static final String parseRequestPath(String path) {
@@ -176,7 +176,7 @@ public class Handler extends Thread {
       } else {
         parsedPath += dirIndex;
       }
-      
+
     }
 
     return parsedPath;
@@ -184,14 +184,17 @@ public class Handler extends Thread {
 
   /**
    * Determines if a request is authorized to be executed.
-   * 
+   *
    * @param request - to check access for
    * @return true if authorized, false if not
    */
   private boolean requestIsAuthorized(Request request) {
-    if (Authenticate.requiresAuth(request.getPath())) {
+
+    StringBuilder authPath = Authenticate.requiresAuth(request.getPath());
+
+    if (authPath != null) {
       if (request.hasAuthHeader()) {
-        if (Authenticate.isAuthorized(request)) {
+        if (Authenticate.isAuthorized(request, authPath)) {
           return true;
         } else {
           request.getResponse().setStatus(Status.FORBIDDEN);

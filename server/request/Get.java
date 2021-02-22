@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -28,7 +29,10 @@ public class Get extends Request {
       Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
 
       // check if cache is active before executing request
-      if(cacheIsActive(content)) {
+      boolean active = cacheIsActive(content);
+      System.out.println("Cache active: " + active);
+
+      if(active) {
         res.setStatus(Status.NOT_MODIFIED);
         return res;
       }
@@ -44,7 +48,6 @@ public class Get extends Request {
       res.setHeader("Expire", Constants.dateFormat.format(tomorrow));
       res.setHeader("Etag", today.getTime() + "==" + content.length);
 
-      updateLastModified(); // TODO look into this!!
       res.setHeader("Last-Modified", Constants.dateFormat.format(getLastModified()));
 
       res.setStatus(Status.OK);
@@ -65,17 +68,28 @@ public class Get extends Request {
     try {
       if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
         String[] tokens = this.headers.get("If-None-Match").split("==");
-        boolean currentCache = Constants.dateFormat.parse(this.headers.get("If-Modified-Since"))
-            .equals(getLastModified());
-        boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
-        // true if cache isn't stale or if content length hasn't changed (retrieved from
-        // Etag), false otherwise
+
+        // Retrieves needed times
+        Date modifiedLast = getLastModified();
+        Date modifiedSince = Constants.dateFormat.parse(this.headers.get("If-Modified-Since"));
+
+        boolean currentCache =  modifiedLast.equals(modifiedSince); // compares time
+        boolean currentEtag = Integer.parseInt(tokens[1]) == content.length; // compares content length
+
+        // update file timestamp if contents of file changed (content.length)
+        if (!currentEtag)
+          updateLastModified();
+
+
+        System.out.println("[DEBUG] current: " + currentCache);
+        System.out.println("[DEBUG] etag: " + currentEtag);
+
+        // true if cache isn't stale or if content length hasn't changed, false otherwise
         return currentCache && currentEtag;
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
-
     // no current cache found
     return false;
   }
@@ -88,7 +102,13 @@ public class Get extends Request {
   private Date getLastModified() {
     File file = new File(this.path); // creates file object
     long lastModified = file.lastModified(); // retrieves last-modified time
-    return new Date(lastModified);
+
+    // removes milliseconds from file timestamp
+    Calendar c = Calendar.getInstance();
+    c.setTime(new Date(lastModified));
+    c.set(Calendar.MILLISECOND, 0);
+
+    return c.getTime();
   }
 
   /**
@@ -102,5 +122,4 @@ public class Get extends Request {
       e.printStackTrace();
     }
   }
-
 }

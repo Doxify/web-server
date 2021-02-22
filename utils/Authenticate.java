@@ -9,14 +9,13 @@ import java.util.Scanner;
 
 public class Authenticate {
 
-  private static StringBuilder authPath;
-
   /**
    * Determines if this request requires authentication headers or not
    *
-   * @return true if auth is required, false if not
+   * @param path - request path
+   * @return .htaccess file path
    */
-  public static boolean requiresAuth(String path) {
+  public static StringBuilder requiresAuth(String path) {
     // checks for htaccess in directory
     String[] dir = path.split("/");
     String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
@@ -25,27 +24,25 @@ public class Authenticate {
 
     for (int i=1; i < dir.length; i++) {
       htaccess = new File(rootPath + ".htaccess");
-      if (htaccess.exists()) {
-        authPath = rootPath;
-        return true;
-      }
+      if (htaccess.exists())
+        return rootPath;
+
       rootPath.append(dir[i]).append("/");
     }
-    return false;
+    return null;
   }
 
   /**
    * Compares the user inputted username:password with the AuthUserFile credentials
    *
-   * validCredentials(): retrieves AuthUserFile username:{SHA}password
-   * encryptClearPassword(): encodes user inputted password using the SHA-1 encryption algorithm
-   *
+   * @param req - Request
+   * @param authPath - .htaccess file path
    * @return true if .htpasswd username:password equals inputted username:password, false if not
    */
-  public static boolean isAuthorized(Request req) {
+  public static boolean isAuthorized(Request req, StringBuilder authPath) {
 
     // retrieves .htpasswd string
-    String validCredentials = validCredentials();
+    String validCredentials = validCredentials(authPath);
     // obtain Base64 encoded string ONLY from Auth Header.
     String authInfo = req.getHeaders().get("Authorization").replace("Basic ", "");
 
@@ -70,9 +67,10 @@ public class Authenticate {
   /**
    * Obtains .htpasswd containing valid credentials username:{SHA}password
    *
+   * @param authPath - .htaccess file path
    * @return username:{SHA}password
    */
-  private static String validCredentials() {
+  private static String validCredentials(StringBuilder authPath) {
     try {
       // checks for htaccess in directory
       File htaccess = new File(authPath + ".htaccess");
@@ -106,6 +104,7 @@ public class Authenticate {
    * Encrypts the cleartext password (that was decoded from the Base64 String
    * provided by the client) using the SHA-1 encryption algorithm
    *
+   * @param password = clear text password
    * @return SHA-1 encrypted user entered password
    */
   private static String encryptClearPassword( String password ) {

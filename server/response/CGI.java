@@ -40,7 +40,7 @@ public class CGI extends Response {
             BufferedInputStream stream = new BufferedInputStream(stdout);
             scriptOutput = stream.readAllBytes();
             stream.close();
-            
+
             this.setStatus(Status.OK);
         } catch(IOException e) {
             // System.out.println("Error occurred while executing script.");
@@ -89,15 +89,15 @@ public class CGI extends Response {
         // getting the script that will be executed
         String path = this.request.getPath();
         String scriptName = path.substring(path.lastIndexOf("/") + 1);
-        
+
         ProcessBuilder pb = new ProcessBuilder("./" + scriptName);
         Map<String, String> env = pb.environment();
 
         // set the working directory of the process
         pb.directory(new File(getScriptWorkingDirectory()));
 
-        // set all request headers as enviornment variables
-        env.clear(); // only want to send request data, not system env variables. 
+        // set all request headers as environment variables
+        env.clear(); // only want to send request data, not system env variables.
         this.request.getHeaders().entrySet().forEach(header -> {
             env.put("HTTP_" + header.getKey().toUpperCase(), header.getValue().toUpperCase());
         });
@@ -111,5 +111,5 @@ public class CGI extends Response {
         String absolutePath = scriptAlias[1].replaceAll("\"", "");
         return absolutePath;
     }
-    
+
 }
