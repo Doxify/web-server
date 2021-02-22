@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
-import server.Response;
+import server.response.Response;
 import utils.Status;
 
 public class Put extends Request {
@@ -39,7 +39,7 @@ public class Put extends Request {
 
         } catch (IOException | SecurityException e) {
             res.setStatus(Status.INTERNAL_SERVER_ERROR);
-            System.out.printf("[DEBUG] Error while writing to %s: %s\n", this.path, e.getMessage());
+            // System.out.printf("[DEBUG] Error while writing to %s: %s\n", this.path, e.getMessage());
         }
 
         return res;

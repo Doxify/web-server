@@ -2,7 +2,7 @@ package server.request;
 
 import java.util.Map;
 
-import server.Response;
+import server.response.Response;
 
 public class Post extends Request {
 
@@ -12,7 +12,7 @@ public class Post extends Request {
 
     @Override
     public Response execute() {
-        return res;
+        return null;
     }
-    
+
 }

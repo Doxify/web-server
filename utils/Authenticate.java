@@ -19,7 +19,7 @@ public class Authenticate {
   public static boolean requiresAuth(String path) {
     // checks for htaccess in directory
     String[] dir = path.split("/");
-    String rootPathRaw = Configuration.getHttpd().getProperty("DocumentRoot");
+    String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
     StringBuilder rootPath = new StringBuilder(rootPathRaw.replaceAll("\"", ""));
     File htaccess;
 

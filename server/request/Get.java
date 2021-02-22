@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.Map;
-import server.Response;
+
+import server.response.Response;
 import utils.Configuration;
+import utils.Constants;
 import utils.Status;
 
 public class Get extends Request {
@@ -18,44 +20,37 @@ public class Get extends Request {
 
   @Override
   public Response execute() {
-    System.out.println("[DEBUG] Executing a GET request");
-
     try {
-      System.out.println("[DEBUG] Getting resource for request");
-
       // get the resource
       byte[] content = Files.readAllBytes(this.getResource());
       // set Dates needed
       Date today = new Date();
       Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
 
-      //if (true) -> leave content blank and status 304
-      //else -> set content, headers and status 200
-      if (isCacheActive(content)) {
-        res.setStatus(Status.NOT_MODIFIED); // set status code 304
+      // check if cache is active before executing request
+      if(cacheIsActive(content)) {
+        res.setStatus(Status.NOT_MODIFIED);
         return res;
-      } else {
-        res.setContent(content);
-        
-        // Headers for caching - Etag is unique and contains content length to compare file changes.
-        res.setHeader("Expire", Configuration.df.format(tomorrow));
-        res.setHeader("Etag", today.getTime() + "==" + content.length);
-
-        updateLastModified(); // update last modified date
-        res.setHeader("Last-Modified", Configuration.df.format(getLastModified()));
-
-        res.setStatus(Status.OK); // set status code 200
       }
 
-      // get the mime type then set the type and length header
+      // set content and all content related headers
       String ext = this.getResourceFileExtension();
+      res.setContent(content);
       res.setHeader("Content-Type", Configuration.getMimeType(ext));
       res.setHeader("Content-Length", String.valueOf(content.length));
 
+      // Headers for caching - Etag is unique and contains content length to
+      // compare file changes.
+      res.setHeader("Expire", Constants.dateFormat.format(tomorrow));
+      res.setHeader("Etag", today.getTime() + "==" + content.length);
+
+      updateLastModified(); // TODO look into this!!
+      res.setHeader("Last-Modified", Constants.dateFormat.format(getLastModified()));
+
+      res.setStatus(Status.OK);
     } catch (IOException | NullPointerException e) {
-        // set status code
-        res.setStatus(Status.NOT_FOUND);
-        System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
+      res.setStatus(Status.NOT_FOUND);
+      // System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
     }
 
     return res;
@@ -66,19 +61,22 @@ public class Get extends Request {
    *
    * @return boolean
    */
-  private boolean isCacheActive(byte[] content) {
+  private boolean cacheIsActive(byte[] content) {
     try {
       if (this.headers.get("If-Modified-Since") != null && this.headers.get("If-None-Match") != null) {
         String[] tokens = this.headers.get("If-None-Match").split("==");
-        boolean currentCache = Configuration.df.parse(this.headers.get("If-Modified-Since")).equals(getLastModified());
+        boolean currentCache = Constants.dateFormat.parse(this.headers.get("If-Modified-Since"))
+            .equals(getLastModified());
         boolean currentEtag = Integer.parseInt(tokens[1]) == content.length;
-        // true if cache isn't stale or if content length hasn't changed (retrieved from Etag), false otherwise
+        // true if cache isn't stale or if content length hasn't changed (retrieved from
+        // Etag), false otherwise
         return currentCache && currentEtag;
       }
     } catch (Exception e) {
-      System.out.printf("[DEBUG] Resource %s was not found.\n", e.getMessage());
+      e.printStackTrace();
     }
-    //no current cache found
+
+    // no current cache found
     return false;
   }
 
@@ -88,7 +86,7 @@ public class Get extends Request {
    * @return Date
    */
   private Date getLastModified() {
-    File file = new File(this.path);  // creates file object
+    File file = new File(this.path); // creates file object
     long lastModified = file.lastModified(); // retrieves last-modified time
     return new Date(lastModified);
   }
@@ -102,7 +100,6 @@ public class Get extends Request {
       Files.setLastModifiedTime(this.getResource(), now);
     } catch (IOException e) {
       e.printStackTrace();
-      System.out.printf("[DEBUG] Could not update last modified time for %s\n", this.path);
     }
   }
 
