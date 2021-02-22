@@ -3,7 +3,7 @@ package server.request;
 import java.io.File;
 import java.util.Map;
 
-import server.Response;
+import server.response.Response;
 import utils.Status;
 
 public class Delete extends Request {
@@ -17,7 +17,7 @@ public class Delete extends Request {
         File file = new File(this.path);
 
         if (!file.exists()) {
-            System.out.println("[DEBUG] User requested a resource that doesn't exist to be deleted.");
+            // System.out.println("[DEBUG] Client requested a resource that doesn't exist to be deleted.");
             res.setStatus(Status.NOT_FOUND);
             return res;
         }
@@ -25,11 +25,11 @@ public class Delete extends Request {
         if (file.delete()) {
             // success
             res.setStatus(Status.NO_CONTENT);
-            System.out.printf("[DEBUG] Successfully deleted %s.\n", this.path);
+            // System.out.printf("[DEBUG] Successfully deleted %s.\n", this.path);
         } else {
             // error
             res.setStatus(Status.INTERNAL_SERVER_ERROR);
-            System.out.printf("[DEBUG] Error occurred while deleting %s.\n", this.path);
+            // System.out.printf("[DEBUG] Error occurred while deleting %s.\n", this.path);
         }
 
         return res;

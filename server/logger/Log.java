@@ -1,6 +1,6 @@
 package server.logger;
 
-import server.Response;
+import server.response.Response;
 import server.Server;
 import utils.Configuration;
 
@@ -52,7 +52,7 @@ public class Log {
 
     // Apache Common Log: 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET
     // /apache_pb.gif HTTP/1.0" 200 2326
-    String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r\n",
+    String log = String.format("%s %s %s %s \"%s %s %s\" %s %s\r",
         (((InetSocketAddress) client.getRemoteSocketAddress()).getAddress()).toString().replace("/", ""), 
         this.identd,
         this.userID, 

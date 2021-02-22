@@ -2,7 +2,7 @@ package server.request;
 
 import java.util.Map;
 
-import server.Response;
+import server.response.Response;
 
 public class Head extends Get {
 
@@ -12,12 +12,10 @@ public class Head extends Get {
 
     @Override
     public Response execute() {
-        // execute request as if it was a get request
+        // execute request as if it was a get request then remove the body since
+        // head requests don't have one.
         super.execute();
-
-        // remove body since head requests dont have a body
         res.setContent(null);
-
         return res;
     }
 

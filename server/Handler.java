@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import server.logger.Log;
 import server.request.*;
 import server.request.Request;
+import server.response.CGI;
+import server.response.Response;
 import utils.Authenticate;
 import utils.Configuration;
 import utils.Status;
@@ -28,26 +30,30 @@ public class Handler extends Thread {
   }
 
   public void run() {
-    System.out.printf("\n[DEBUG] Handling request for %s: \n", client.toString());
-
     try {
       // parse the request and get a generic response
-      Request req = parseRequest();
-      Response res = req.getResponse();
+      Request request = parseRequest();
+      Response response = request.getResponse();
 
       // execute request if it has access
-      if (isAuthorized(req)) {
-        res = req.execute();
+      if(requestIsAuthorized(request)) {
+        if(requestIsScriptAliased(request)) {
+          CGI cgi = new CGI(request);
+          response = cgi.executeScript();
+        } else {
+          response = request.execute();
+        }
       }
 
-      // log the request
-      logger.log(client, res);
+      // log the request/response
+      logger.log(client, response);
 
       // respond to client and close the connection.
-      client.getOutputStream().write(res.generateResponse());
+      client.getOutputStream().write(response.generateResponse());
       client.getOutputStream().flush();
       client.close();
-    } catch (IOException e) {
+
+    } catch (Exception e) {
       System.out.println("Error occurred while processing socket.");
       System.out.println(e.getMessage());
     }
@@ -56,10 +62,9 @@ public class Handler extends Thread {
   /**
    * Parses Socket connection and returns an instance of the Request object which
    * represents the parsed connection/request.
-   * 
-   * Returns null if the request is not valid HTTP.
    *
-   * @return Request object which represents the parsed request or null
+   * @return Request object which represents the parsed request or null if
+   * invalid http is detected
    */
   private Request parseRequest() throws IOException {
     // reads input stream from the client's socket
@@ -77,7 +82,6 @@ public class Handler extends Thread {
     String[] lineSplit;
     int contentLength = 0;
 
-    // while (!(line = reader.readLine()).isBlank()) {
     while (!(line = reader.readLine()).isBlank()) {
       // if path is null, we are on the first line and it must be parsed
       // differently (doesn't contain a colon ":").
@@ -115,7 +119,7 @@ public class Handler extends Thread {
   /**
    * Helper function for determining which type of Request object to instantiate.
    */
-  private Request generateRequest(Map<String, String> headers, String path, String method, String version,
+  private static final Request generateRequest(Map<String, String> headers, String path, String method, String version,
       String body) {
     switch (method) {
       case "HEAD":
@@ -136,9 +140,9 @@ public class Handler extends Thread {
    * Parses a Request's path so that it is relative to the server's file system.
    * Handles aliases, script aliases, and resolve path.
    * 
-   * @param request
+   * @param path - raw HTTP request path
    */
-  private String parseRequestPath(String path) {
+  private static final String parseRequestPath(String path) {
     String parsedPath = path;
     boolean isAliased = false;
 
@@ -172,20 +176,20 @@ public class Handler extends Thread {
       } else {
         parsedPath += dirIndex;
       }
+      
     }
 
     return parsedPath;
   }
 
   /**
-   * Helper function that determines if a request is authorized to be executed.
+   * Determines if a request is authorized to be executed.
    * 
    * @param request - to check access for
    * @return true if authorized, false if not
    */
-  private boolean isAuthorized(Request request) {
+  private boolean requestIsAuthorized(Request request) {
     if (Authenticate.requiresAuth(request.getPath())) {
-      System.out.println("Requires auth...");
       if (request.hasAuthHeader()) {
         if (Authenticate.isAuthorized(request)) {
           return true;
@@ -200,6 +204,12 @@ public class Handler extends Thread {
       }
     }
     return true;
+  }
+
+  public static final boolean requestIsScriptAliased(Request request) {
+    // [0] = uri alias, [1] = absolute file system path
+    String[] scriptAlias = Configuration.getConfigProperty("ScriptAlias").split(" ");
+    return request.getPath().contains(scriptAlias[0]);
   }
 
 }

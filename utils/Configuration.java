@@ -33,7 +33,7 @@ public final class Configuration {
 
         for (Entry<String, List<String>> entry : httpd_config.entrySet()) {
             // generate alias map
-            if (entry.getKey().equals("Alias") || entry.getKey().equals("ScriptAlias")) {
+            if (entry.getKey().equals("Alias")) {
                 for (String alias : entry.getValue()) {
                     // Aliases have the format of Alias </dir/> <./root/dir/>
                     // where '/dir/' points to './root/dir/'.

@@ -3,16 +3,17 @@ package server.request;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import server.Response;
+
+import server.response.Response;
 
 public abstract class Request {
 
-  protected Map<String, String> headers; // map of request headers
-  protected String path; // path of the requested resource
-  protected String method; // HTTP method
-  protected String version; // HTTP request version
-  protected String body; // HTTP request body
-  protected Response res; // response for this request
+  protected Map<String, String> headers;
+  protected String path;
+  protected String method;
+  protected String version;
+  protected String body;
+  protected Response res;
 
   public Request(Map<String, String> headers, String path, String method, String version, String body) {
     this.headers = headers;
@@ -51,20 +52,11 @@ public abstract class Request {
     return this.res;
   }
 
-  /**
-   * Returns whether or not this request has the authorization header.
-   *
-   * @return true if it does, false if it does not.
-   */
   public boolean hasAuthHeader() {
     return this.headers.get("Authorization") != null;
   }
 
-  /**
-   * Returns a Path object representing this request's resource.
-   */
   public Path getResource() {
-    System.out.printf("[DEBUG] Looking for %s\n", this.path);
     return Paths.get(this.path);
   }
 
@@ -91,6 +83,9 @@ public abstract class Request {
     }
   }
 
+  /**
+   * USED FOR DEBUG PURPOSES
+   */
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
