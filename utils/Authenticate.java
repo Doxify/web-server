@@ -17,16 +17,17 @@ public class Authenticate {
    */
   public static StringBuilder requiresAuth(String path) {
     // checks for htaccess in directory
-    String[] dir = path.split("/");
     String rootPathRaw = Configuration.getConfigProperty("DocumentRoot");
     StringBuilder rootPath = new StringBuilder(rootPathRaw.replaceAll("\"", ""));
+    String[] absolutePath = path.split(rootPath.toString());
+    String[] dir = absolutePath[1].split("/");
     File htaccess;
 
-    for (int i=1; i < dir.length; i++) {
+    for (int i=0; i < dir.length; i++) {
       htaccess = new File(rootPath + ".htaccess");
-      if (htaccess.exists())
+      if (htaccess.exists()) {
         return rootPath;
-
+      }
       rootPath.append(dir[i]).append("/");
     }
     return null;

@@ -44,7 +44,6 @@ public class Handler extends Thread {
           response = request.execute();
         }
       }
-
       // log the request/response
       logger.log(client, response);
 
@@ -206,6 +205,8 @@ public class Handler extends Thread {
         return false;
       }
     }
+
+    System.out.println("Auth path: " + request.getPath());
     return true;
   }
 
