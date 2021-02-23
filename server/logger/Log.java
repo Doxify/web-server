@@ -61,7 +61,7 @@ public class Log {
         response.getRequest().getPath(),
         response.getRequest().getVersion(), 
         response.getStatus().code, 
-        response.getHeader("Content-Length"));
+        response.getHeader("Content-Length") == null ? "-" : response.getHeader("Content-Length"));
 
     // Console Handler
     System.out.println(log);
