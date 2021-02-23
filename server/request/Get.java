@@ -29,10 +29,7 @@ public class Get extends Request {
       Date tomorrow = new Date(today.getTime() + (1000 * 60 * 60 * 24));
 
       // check if cache is active before executing request
-      boolean active = cacheIsActive(content);
-      System.out.println("Cache active: " + active);
-
-      if(active) {
+      if(cacheIsActive(content)) {
         res.setStatus(Status.NOT_MODIFIED);
         return res;
       }
@@ -79,10 +76,6 @@ public class Get extends Request {
         // update file timestamp if contents of file changed (content.length)
         if (!currentEtag)
           updateLastModified();
-
-
-        System.out.println("[DEBUG] current: " + currentCache);
-        System.out.println("[DEBUG] etag: " + currentEtag);
 
         // true if cache isn't stale or if content length hasn't changed, false otherwise
         return currentCache && currentEtag;
