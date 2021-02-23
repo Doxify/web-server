@@ -10,4 +10,7 @@ foreach my $key (sort(keys(%ENV))) {
     print "$key = $ENV{$key}<br>\n";
 }
 
+my $input =  (<STDIN>);
+print "$input\n";
+
 print end_html;

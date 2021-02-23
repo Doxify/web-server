@@ -14,12 +14,10 @@ import utils.Status;
 
 public class CGI extends Response {
 
-    private Request request;
     private byte[] scriptOutput;
 
     public CGI(Request request) {
         super(request);
-        this.request = request;
     }
 
     public final Response executeScript() {
@@ -33,9 +31,13 @@ public class CGI extends Response {
             // send script the body of POST and PUT requests
             String method = this.request.getMethod();
             if(method.equals("POST") || method.equals("PUT")) {
-                stdin.write(this.request.getBody().getBytes());
+                String body = this.request.getBody();
+                if(body != null) {
+                    stdin.write(this.request.getBody().getBytes());
+                }
             }
-
+            stdin.close();
+            
             // get the output from the script
             BufferedInputStream stream = new BufferedInputStream(stdout);
             scriptOutput = stream.readAllBytes();
