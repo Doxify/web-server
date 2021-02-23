@@ -86,8 +86,25 @@ public class Response {
 
             return stream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            // return internal server error
+            this.setStatus(Status.INTERNAL_SERVER_ERROR);
+            this.setHeader("Content-Type", "text/plain");
+            this.setHeader("Content-Length", "0");
+            return generateGenericResponse();
         }
+    }
+
+    protected final byte[] generateGenericResponse() {
+        String response = "";
+
+        // write the status line
+        response += (this.request.getVersion() + " " + this.status.code + "\r\n");
+        
+        // write the headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            response += (entry.getKey() + ": " + entry.getValue() + "\r\n");
+        }
+        
+        return response.getBytes();
     }
 }

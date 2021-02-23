@@ -45,8 +45,6 @@ public class CGI extends Response {
 
             this.setStatus(Status.OK);
         } catch(IOException e) {
-            // System.out.println("Error occurred while executing script.");
-            // System.out.println(e.getMessage());
             this.setStatus(Status.INTERNAL_SERVER_ERROR);
         }
 
@@ -81,8 +79,11 @@ public class CGI extends Response {
 
             return stream.toByteArray();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            // return internal server error
+            this.setStatus(Status.INTERNAL_SERVER_ERROR);
+            this.setHeader("Content-Type", "text/plain");
+            this.setHeader("Content-Length", "0");
+            return generateGenericResponse();
         }
     }
 

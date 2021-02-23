@@ -206,7 +206,6 @@ public class Handler extends Thread {
       }
     }
 
-    System.out.println("Auth path: " + request.getPath());
     return true;
   }
 
